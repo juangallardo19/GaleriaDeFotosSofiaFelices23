@@ -70,7 +70,10 @@ export async function requireAdmin(req: NextRequest, app: AppContainer): Promise
 }
 
 export function errorResponse(err: unknown): NextResponse {
-  if (err instanceof AppError) return NextResponse.json({ error: err.code, message: err.message }, { status: err.status })
+  if (err instanceof AppError) {
+    if (err.status >= 500) console.error(err)
+    return NextResponse.json({ error: err.code, message: err.message }, { status: err.status })
+  }
   console.error(err)
   return NextResponse.json({ error: 'interno' }, { status: 500 })
 }

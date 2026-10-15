@@ -26,7 +26,7 @@ export function UploadPicker({ onSelect, disabled = false }: { onSelect: (files:
   }
 
   const tile =
-    'cosido group relative flex h-full min-h-[132px] cursor-pointer flex-col items-center justify-center gap-2 rounded-panel p-5 text-center transition-transform duration-300 hover:-translate-y-1 hover:rotate-[-1deg] active:scale-[0.97]'
+    'cosido group relative flex h-full min-h-[132px] cursor-pointer flex-col items-center justify-center gap-2 rounded-card p-5 text-center transition-transform duration-300 hover:-translate-y-1 hover:rotate-[-1deg] active:scale-[0.97]'
 
   return (
     <div className="flex flex-col gap-3">

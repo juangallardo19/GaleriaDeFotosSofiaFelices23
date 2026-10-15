@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
         />
       </div>
       <div className="flex flex-1 items-center justify-center px-5 py-10">
-        <div className="entrada w-full max-w-[440px] rounded-panel border border-linea bg-white/80 p-8 shadow-[0_20px_50px_rgb(90_18_56/0.12)] md:p-10">
+        <div className="tarjeta entrada w-full max-w-[440px] p-8 md:p-10">
           <p className="font-script text-6xl text-fucsia">Sofi</p>
           <h1 className="mt-1 font-serif text-3xl">Panel de anfitriones</h1>
           <p className="mb-6 mt-2 text-sm leading-relaxed opacity-75">Solo para quienes organizan la fiesta: invitados, QR y moderación del álbum.</p>

@@ -67,7 +67,7 @@ export function CommentsPanel({ mediaId, viewer, onCountChange }: Props) {
   const canWrite = viewer.role !== 'visitor'
 
   return (
-    <section aria-label="Comentarios" className="mt-5 rounded-panel bg-crema p-4 text-vino md:p-5">
+    <section aria-label="Comentarios" className="tarjeta mt-5 p-4 text-vino md:p-5">
       <h3 className="text-sm font-semibold">Comentarios {items ? `(${items.length})` : ''}</h3>
       {items === null && !error && <p className="mt-3 text-sm opacity-60">Cargando…</p>}
       {items?.length === 0 && <p className="mt-3 text-sm opacity-60">{canWrite ? 'Sé el primero en comentar.' : 'Todavía no hay comentarios.'}</p>}

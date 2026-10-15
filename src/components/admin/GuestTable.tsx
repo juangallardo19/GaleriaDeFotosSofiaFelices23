@@ -36,7 +36,7 @@ export function GuestTable({ rows, onShowQr, onDelete }: Props) {
       type="button"
       aria-pressed={filter === id}
       onClick={() => setFilter(id)}
-      className={`min-h-10 rounded-chip border px-3.5 text-[13px] ${filter === id ? 'border-fucsia bg-rosa font-semibold text-fucsia' : 'border-vino/20 bg-white/60 font-medium'}`}
+      className="opcion min-h-10 rounded-chip px-3.5 text-[13px] font-medium hover:-translate-y-0.5 active:scale-95"
     >
       {label}
     </button>
@@ -65,7 +65,7 @@ export function GuestTable({ rows, onShowQr, onDelete }: Props) {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-card border border-linea bg-white/75">
+      <div className="tarjeta overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead className="bg-rosa/50 text-[12.5px] font-semibold">
             <tr>

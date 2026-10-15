@@ -20,7 +20,7 @@ interface Stats {
 
 function StatCard({ icon, value, label, children }: { icon: IconName; value: string; label: string; children?: ReactNode }) {
   return (
-    <div className="group flex flex-col gap-2 rounded-card border border-linea bg-white/72 p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgb(90_18_56/0.12)] md:p-5">
+    <div className="tarjeta group flex flex-col gap-2 p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgb(90_18_56/0.12)] md:p-5">
       <div className="flex items-center gap-3">
         <span className="flex size-10 items-center justify-center rounded-[14px] bg-rosa text-fucsia transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
           <Icon name={icon} size={20} strokeWidth={2} />

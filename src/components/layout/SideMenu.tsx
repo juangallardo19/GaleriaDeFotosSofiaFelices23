@@ -53,7 +53,7 @@ export function SideMenu({ open, current, onClose, readOnly = false, guestName }
                 onClick={onClose}
                 aria-current={active ? 'page' : undefined}
                 style={{ animationDelay: `${80 + i * 60}ms` }}
-                className={`aparecer relative flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-[15px] transition-transform duration-200 hover:translate-x-1 ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(255_138_31/0.7)]' : 'font-medium'}`}
+                className="opcion-ligera aparecer flex min-h-12 items-center gap-3 rounded-boton px-3.5 text-[15px] font-medium hover:translate-x-1"
               >
                 <Icon name={item.icon} size={20} strokeWidth={2} />
                 {item.label}

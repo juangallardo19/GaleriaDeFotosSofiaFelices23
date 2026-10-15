@@ -1,5 +1,6 @@
 import type { CardArt } from '@/features/admin/cards-pdf'
 import { buildContainer, type AppConfig, type AppContainer } from './container'
+import { envValue } from './env'
 import { GoogleAuth } from './google/auth'
 import { GmailMailer } from './mail/gmail'
 import { ConsoleMailer } from './mail/types'
@@ -8,7 +9,7 @@ import { GoogleDriveStorage } from './storage/google-drive'
 import { BlobThumbStore, blobAccess } from './storage/thumbs'
 
 function required(name: string): string {
-  const value = process.env[name]
+  const value = envValue(name)
   if (!value) throw new Error(`Falta la variable de entorno ${name}`)
   return value
 }
@@ -22,8 +23,8 @@ export async function createProductionContainer(config: AppConfig): Promise<AppC
   const container = buildContainer({
     repos: await createPostgresRepos(required('DATABASE_URL')),
     storage: new GoogleDriveStorage({ auth, apiKey: required('GOOGLE_API_KEY') }),
-    thumbs: new BlobThumbStore({ access: blobAccess(process.env.BLOB_ACCESS) }),
-    mailer: process.env.GMAIL_SENDER ? new GmailMailer({ auth, from: process.env.GMAIL_SENDER }) : new ConsoleMailer(),
+    thumbs: new BlobThumbStore({ access: blobAccess(envValue('BLOB_ACCESS')), token: envValue('BLOB_READ_WRITE_TOKEN') }),
+    mailer: envValue('GMAIL_SENDER') ? new GmailMailer({ auth, from: envValue('GMAIL_SENDER')! }) : new ConsoleMailer(),
     config,
   })
   container.cardArt = async (): Promise<CardArt> => {

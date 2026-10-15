@@ -23,7 +23,7 @@ function TaskRow({ task, onRetry, onCancel }: { task: UploadTask; onRetry: Props
   const isVideo = task.file.type.startsWith('video/') || /\.(mov|mp4|webm|3gp|m4v)$/i.test(task.file.name)
   const progress = task.status === 'listo' ? 100 : percent(task.uploadedBytes, task.file.size)
   return (
-    <li className="flex items-center gap-3 rounded-2xl border border-linea bg-white/75 p-3">
+    <li className="tarjeta flex items-center gap-3 p-3">
       <span aria-hidden="true" className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${isVideo ? 'bg-[#FFF0D4] text-naranja' : 'bg-rosa text-fucsia'}`}>
         <Icon name={isVideo ? 'play' : 'image'} size={20} filled={isVideo} />
       </span>
@@ -63,7 +63,7 @@ export function UploadList({ snapshot, onRetry, onCancel }: Props) {
   const busy = !snapshot.isIdle
   return (
     <section aria-label="Archivos en subida" className="flex flex-col gap-4">
-      <div className="rounded-panel border border-linea bg-white/80 p-5">
+      <div className="tarjeta p-5">
         <div className="flex items-baseline justify-between">
           <p className="text-base font-semibold">{busy ? `Subiendo ${Math.min(total, snapshot.done + snapshot.active)} de ${total}` : `${snapshot.done} de ${total} recuerdos subidos`}</p>
           <p className="font-serif text-2xl text-fucsia">{`${overall} %`}</p>

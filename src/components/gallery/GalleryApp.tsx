@@ -276,7 +276,7 @@ export function GalleryApp({ mode, empty }: Props) {
         type="button"
         aria-pressed={active}
         onClick={() => changeView(sort, { ...extra, kind })}
-        className={`flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip border px-3.5 text-[12.5px] transition-[transform,background-color,border-color] duration-200 hover:-translate-y-0.5 active:scale-95 ${active ? 'border-fucsia bg-rosa font-semibold text-fucsia' : 'border-vino/20 bg-white/60 font-medium hover:border-fucsia/50 hover:bg-rosa/40'}`}
+        className="opcion flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip px-3.5 text-[12.5px] font-medium hover:-translate-y-0.5 active:scale-95"
       >
         {kind && <Icon name={kind === 'photo' ? 'image' : 'play'} size={14} filled={kind === 'video'} />}
         {label}
@@ -301,7 +301,7 @@ export function GalleryApp({ mode, empty }: Props) {
             type="button"
             aria-label={`Ordenar y filtrar: ${SORT_LABELS[sort]}`}
             onClick={() => setSheet(true)}
-            className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip border border-vino/20 bg-white/70 px-3 text-[12.5px] font-semibold transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-fucsia/50 active:scale-95"
+            className="opcion flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip px-3 text-[12.5px] font-semibold hover:-translate-y-0.5 active:scale-95"
           >
             <Icon name="sort" size={16} strokeWidth={2} className="text-naranja" />
             <span className="hidden sm:inline">{SORT_LABELS[sort]}</span>

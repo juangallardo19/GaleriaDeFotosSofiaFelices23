@@ -38,7 +38,7 @@ function Toggle({ label, pressed, onClick }: { label: string; pressed: boolean; 
       type="button"
       aria-pressed={pressed}
       onClick={onClick}
-      className={`min-h-11 rounded-chip border px-4 text-[13px] ${pressed ? 'border-fucsia bg-rosa font-semibold text-fucsia' : 'border-vino/20 bg-white/60 font-medium'}`}
+      className="opcion min-h-11 rounded-chip px-4 text-[13px] font-medium hover:-translate-y-0.5 active:scale-95"
     >
       {label}
     </button>
@@ -74,7 +74,7 @@ export function SortSheet({ open, sort, filter, onApply, onClose, readOnly = fal
             {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
               <label
                 key={key}
-                className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl px-3 text-sm ${draftSort === key ? 'bg-rosa font-semibold text-fucsia' : ''}`}
+                className="opcion-ligera flex min-h-11 cursor-pointer items-center gap-3 rounded-boton px-3 text-sm"
               >
                 <input type="radio" name="orden" value={key} checked={draftSort === key} onChange={() => setDraftSort(key)} className="size-4 accent-fucsia" />
                 {SORT_LABELS[key]}

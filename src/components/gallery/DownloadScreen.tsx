@@ -61,10 +61,10 @@ export function DownloadScreen() {
   }
 
   if (error && !summary) return <p className="py-10 text-center text-sm">{error}</p>
-  if (!summary || !me) return <div className="shimmer mx-auto h-80 w-full max-w-md rounded-panel" aria-hidden="true" />
+  if (!summary || !me) return <div className="shimmer mx-auto h-80 w-full max-w-md rounded-card" aria-hidden="true" />
 
   return (
-    <Reveal className="mx-auto w-full max-w-md rounded-panel border border-linea bg-white/70 p-6">
+    <Reveal className="tarjeta mx-auto w-full max-w-md p-6">
       <DownloadSheet
         open
         asPage

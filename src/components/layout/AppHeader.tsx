@@ -44,7 +44,7 @@ export function AppHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={pathname === item.href ? 'page' : undefined}
-                className={`flex min-h-10 items-center gap-2 whitespace-nowrap rounded-2xl px-3 text-sm transition-[background-color,transform] hover:-translate-y-0.5 ${pathname === item.href ? 'bg-rosa font-semibold text-fucsia' : 'font-medium hover:bg-rosa/50'}`}
+                className="opcion-ligera flex min-h-10 items-center gap-2 whitespace-nowrap rounded-boton px-3.5 text-sm font-medium hover:-translate-y-0.5"
               >
                 <Icon name={item.icon} size={18} strokeWidth={2} />
                 {item.label}

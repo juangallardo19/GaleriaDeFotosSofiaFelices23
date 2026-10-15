@@ -56,12 +56,56 @@ body::before {
 /* Componentes propios en su capa: las utilidades de Tailwind (fixed, absolute…) pueden sobrescribirlos */
 @layer components {
   /* Etiqueta cosida: costura punteada interior de botones y chips */
+  /* La costura hereda el redondeo de su contenedor para no cortarse en las esquinas */
   .cosido::after {
     content: '';
     position: absolute;
     inset: 4px;
     border: 1px dashed var(--costura, rgb(255 255 255 / 0.55));
-    border-radius: calc(var(--radius-boton) - 3px);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  /* Tarjeta: el mismo contenedor en toda la app (cards, listas, paneles, estadísticas) */
+  .tarjeta {
+    border-radius: var(--radius-card);
+    border: 1px solid rgb(255 138 31 / 0.22);
+    background-color: rgb(255 253 251 / 0.92);
+    box-shadow: 0 10px 24px rgb(90 18 56 / 0.08);
+  }
+
+  /* Opción elegible (chips, filtros, radios, menús): un solo aspecto de normal, hover y seleccionado */
+  .opcion,
+  .opcion-ligera {
+    position: relative;
+    border: 1px solid transparent;
+    transition:
+      transform 0.2s,
+      background-color 0.2s,
+      border-color 0.2s,
+      color 0.2s;
+  }
+  .opcion {
+    border-color: rgb(90 18 56 / 0.18);
+    background-color: rgb(255 255 255 / 0.6);
+  }
+  .opcion:hover,
+  .opcion-ligera:hover {
+    border-color: rgb(230 21 122 / 0.45);
+    background-color: rgb(252 225 234 / 0.45);
+  }
+  :is(.opcion, .opcion-ligera):is([aria-pressed='true'], [aria-current='page'], [data-activo='true'], :has(input:checked)) {
+    border-color: var(--color-fucsia);
+    background-color: var(--color-rosa);
+    color: var(--color-fucsia);
+    font-weight: 600;
+  }
+  :is(.opcion, .opcion-ligera):is([aria-pressed='true'], [aria-current='page'], [data-activo='true'], :has(input:checked))::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px dashed rgb(255 138 31 / 0.75);
+    border-radius: inherit;
     pointer-events: none;
   }
 

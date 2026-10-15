@@ -28,7 +28,7 @@ export function CardsScreen() {
 
   const option = (value: boolean, title: string, text: string) => (
     <label
-      className={`flex min-h-16 flex-1 cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-fucsia/50 ${duplex === value ? 'border-fucsia bg-rosa/70' : 'border-linea bg-white/70'}`}
+      className="opcion flex min-h-16 flex-1 cursor-pointer items-start gap-3 rounded-boton p-4 hover:-translate-y-0.5"
     >
       <input type="radio" name="caras" checked={duplex === value} onChange={() => setDuplex(value)} className="mt-1 size-4 accent-fucsia" />
       <span>
@@ -66,7 +66,7 @@ export function CardsScreen() {
                 ? 'Primero crea o importa los invitados.'
                 : `Se generan ${count} tarjetas, una por invitado, en orden alfabético.`}
           </p>
-          <ul className="flex flex-col gap-2 rounded-card border border-linea bg-white/70 p-5 text-sm">
+          <ul className="tarjeta flex flex-col gap-2 p-5 text-sm">
             <li className="flex gap-2.5">
               <Icon name="printer" size={18} strokeWidth={2} className="mt-0.5 shrink-0 text-fucsia" />
               Imprime al 100 % (tamaño real), sin «ajustar a la página».

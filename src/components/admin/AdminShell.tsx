@@ -51,7 +51,7 @@ export function AdminShell({ title, subtitle, actions, children }: Props) {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
-                className={`relative flex min-h-11 shrink-0 items-center gap-2.5 rounded-2xl px-3.5 text-sm transition-transform duration-200 hover:translate-x-1 md:text-[14.5px] ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(255_138_31/0.7)]' : 'font-medium hover:bg-crema/60'}`}
+                className="opcion-ligera flex min-h-11 shrink-0 items-center gap-2.5 rounded-boton px-3.5 text-sm font-medium hover:translate-x-1 md:text-[14.5px]"
               >
                 <Icon name={item.icon} size={19} strokeWidth={2} />
                 {item.label}

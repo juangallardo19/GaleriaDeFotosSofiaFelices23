@@ -46,7 +46,12 @@ describe('Token de acceso de Google', () => {
 
   it('falla con un mensaje claro si Google rechaza el refresh token', async () => {
     const a = auth(fakeFetch(() => json({ error: 'invalid_grant' }, { status: 400 })).fn)
-    await expect(a.accessToken()).rejects.toThrow(/Google rechazó el refresh token/)
+    await expect(a.accessToken()).rejects.toThrow(/Google rechazó el refresh token \(invalid_grant\)/)
+  })
+
+  it('ese fallo llega a la app como servicio no disponible (503), no como error genérico', async () => {
+    const a = auth(fakeFetch(() => json({ error: 'invalid_client' }, { status: 401 })).fn)
+    await expect(a.accessToken()).rejects.toMatchObject({ code: 'servicio', status: 503 })
   })
 })
 
@@ -101,6 +106,7 @@ describe('Google Drive (Adapter)', () => {
   it('falla si Drive no devuelve la URL de la sesión', async () => {
     const { drive } = driveWithFolders((c) => (c.url.startsWith('https://www.googleapis.com/upload/') ? new Response('{}', { status: 403 }) : undefined))
     await expect(drive.createUploadSession({ name: 'a', size: 1, mime: 'image/jpeg', folder: 'fotos' })).rejects.toThrow(/Drive no inició la subida/)
+    await expect(drive.createUploadSession({ name: 'a', size: 1, mime: 'image/jpeg', folder: 'fotos' })).rejects.toMatchObject({ code: 'servicio' })
   })
 
   it('hace público el archivo como lector para cualquiera con el enlace', async () => {

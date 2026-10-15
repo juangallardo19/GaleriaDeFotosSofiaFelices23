@@ -55,7 +55,7 @@ export function UploadScreen() {
       )}
       {snapshot.tasks.length === 0 && (
         <Reveal delay={240}>
-          <ul className="flex flex-col gap-2.5 rounded-panel border border-linea bg-white/70 p-5 text-sm">
+          <ul className="tarjeta flex flex-col gap-2.5 p-5 text-sm">
             <li className="flex gap-2.5">
               <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
               Puedes elegir hasta 30 fotos y videos a la vez, de hasta 1 GB cada uno.
@@ -73,7 +73,7 @@ export function UploadScreen() {
       )}
       <UploadList snapshot={snapshot} onRetry={(id) => queue.retry(id)} onCancel={(id) => queue.cancel(id)} />
       {finished && (
-        <div className="entrada flex flex-col items-center gap-3 rounded-panel bg-rosa/80 p-6 text-center [--animacion:entrar-pop]">
+        <div className="tarjeta entrada flex flex-col items-center gap-3 bg-rosa/80 p-6 text-center [--animacion:entrar-pop]">
           <p className="font-script text-5xl text-fucsia">¡Gracias!</p>
           <p className="text-sm">
             {snapshot.done === 1 ? 'Tu recuerdo ya está en el álbum de Sofi.' : `Tus ${snapshot.done} recuerdos ya están en el álbum de Sofi.`}

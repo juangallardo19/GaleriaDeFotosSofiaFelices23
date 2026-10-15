@@ -1,4 +1,4 @@
-export type ErrorCode = 'invalido' | 'no-autorizado' | 'prohibido' | 'no-encontrado' | 'limite'
+export type ErrorCode = 'invalido' | 'no-autorizado' | 'prohibido' | 'no-encontrado' | 'limite' | 'servicio'
 
 const STATUS: Record<ErrorCode, number> = {
   invalido: 400,
@@ -6,6 +6,7 @@ const STATUS: Record<ErrorCode, number> = {
   prohibido: 403,
   'no-encontrado': 404,
   limite: 429,
+  servicio: 503,
 }
 
 export class AppError extends Error {

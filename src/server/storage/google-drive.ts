@@ -1,3 +1,4 @@
+import { AppError } from '../errors'
 import type { GoogleAuth } from '../google/auth'
 import type { FolderLinks, StorageFolder, StorageProvider } from './types'
 
@@ -39,7 +40,7 @@ export class GoogleDriveStorage implements StorageProvider {
       body: JSON.stringify({ name, mimeType: FOLDER_MIME, ...(parent ? { parents: [parent] } : {}) }),
     })
     const body = (await created.json()) as { id?: string }
-    if (!body.id) throw new Error(`No se pudo crear la carpeta ${name} en Drive`)
+    if (!body.id) throw new AppError('servicio', `No se pudo crear la carpeta ${name} en Drive`)
     return body.id
   }
 
@@ -85,7 +86,7 @@ export class GoogleDriveStorage implements StorageProvider {
       body: JSON.stringify({ name: input.name, parents: [input.folder === 'fotos' ? folders.fotos : folders.videos] }),
     })
     const location = res.headers.get('location')
-    if (!res.ok || !location) throw new Error(`Drive no inició la subida (${res.status})`)
+    if (!res.ok || !location) throw new AppError('servicio', `Drive no inició la subida (${res.status})`)
     return { uploadUrl: location }
   }
 
@@ -95,7 +96,7 @@ export class GoogleDriveStorage implements StorageProvider {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ role: 'reader', type: 'anyone' }),
     })
-    if (!res.ok) throw new Error(`Drive no pudo compartir el archivo (${res.status})`)
+    if (!res.ok) throw new AppError('servicio', `Drive no pudo compartir el archivo (${res.status})`)
   }
 
   downloadUrl(fileId: string) {
@@ -108,7 +109,7 @@ export class GoogleDriveStorage implements StorageProvider {
 
   async remove(fileId: string) {
     const res = await this.request(`${API}/files/${fileId}`, { method: 'DELETE' })
-    if (!res.ok && res.status !== 404) throw new Error(`Drive no pudo borrar el archivo (${res.status})`)
+    if (!res.ok && res.status !== 404) throw new AppError('servicio', `Drive no pudo borrar el archivo (${res.status})`)
   }
 
   async quota() {

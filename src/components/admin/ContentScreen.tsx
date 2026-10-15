@@ -75,7 +75,7 @@ export function ContentScreen() {
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`min-h-10 rounded-chip border px-3.5 text-[13px] ${active ? 'border-fucsia bg-rosa font-semibold text-fucsia' : 'border-vino/20 bg-white/60 font-medium'}`}
+      className="opcion min-h-10 rounded-chip px-3.5 text-[13px] font-medium hover:-translate-y-0.5 active:scale-95"
     >
       {label}
     </button>

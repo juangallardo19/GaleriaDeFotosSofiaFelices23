@@ -1,3 +1,5 @@
+import { AppError } from '../errors'
+
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const SAFETY_MARGIN_MS = 60_000
 
@@ -41,7 +43,7 @@ export class GoogleAuth {
       }).toString(),
     })
     const body = (await res.json().catch(() => ({}))) as { access_token?: string; expires_in?: number; error?: string }
-    if (!res.ok || !body.access_token) throw new Error(`Google rechazó el refresh token (${body.error ?? res.status})`)
+    if (!res.ok || !body.access_token) throw new AppError('servicio', `Google rechazó el refresh token (${body.error ?? res.status})`)
     this.token = { value: body.access_token, expiresAt: this.now() + (body.expires_in ?? 3600) * 1000 }
     return this.token.value
   }

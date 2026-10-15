@@ -10,6 +10,7 @@ import {
 import type { CommentRepository, GuestRepository, LikeRepository, MediaRepository, SettingsRepository } from './repositories/types'
 import { createGuestService, type GuestService } from './services/guest-service'
 import { createMediaService, type MediaService } from './services/media-service'
+import { envValue } from './env'
 import { DevStorage } from './storage/dev'
 import { BlobThumbStore, InlineThumbStore, blobAccess, type ThumbStore } from './storage/thumbs'
 import type { StorageProvider } from './storage/types'
@@ -78,17 +79,17 @@ export function createMemoryContainer(opts: BuildOptions): AppContainer {
 
 export const E2E_TOKEN = 'E2ETIAMARTA00000000000'
 
-export function configFromEnv(env: NodeJS.ProcessEnv = process.env): AppConfig {
-  const baseUrl = env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-  const sessionSecret = env.SESSION_SECRET
+export function configFromEnv(env: Record<string, string | undefined> = process.env): AppConfig {
+  const baseUrl = envValue('NEXT_PUBLIC_SITE_URL', env) ?? 'http://localhost:3000'
+  const sessionSecret = envValue('SESSION_SECRET', env)
   if (!sessionSecret || sessionSecret.length < 32) throw new Error('SESSION_SECRET debe tener al menos 32 caracteres')
   return {
     sessionSecret,
-    adminPassword: env.ADMIN_PASSWORD,
+    adminPassword: envValue('ADMIN_PASSWORD', env),
     baseUrl,
     secureCookies: baseUrl.startsWith('https://'),
-    alertEmail: env.ALERT_EMAIL ?? 'sofiacumpleanosgaleriadefotos@gmail.com',
-    driveFolderUrl: env.NEXT_PUBLIC_DRIVE_FOLDER_URL ?? null,
+    alertEmail: envValue('ALERT_EMAIL', env) ?? 'sofiacumpleanosgaleriadefotos@gmail.com',
+    driveFolderUrl: envValue('NEXT_PUBLIC_DRIVE_FOLDER_URL', env) ?? null,
   }
 }
 
