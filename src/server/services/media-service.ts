@@ -83,8 +83,13 @@ export function createMediaService(deps: MediaServiceDeps) {
     await deps.settings.set<QuotaState>(QUOTA_KEY, { lastCheckedAt: at.toISOString(), lastRatio: ratio })
   }
 
+  function mustParticipate(viewer: Viewer) {
+    if (viewer.role === 'visitor') throw new AppError('prohibido', 'Para participar hay que entrar con el QR de la tarjeta')
+  }
+
   return {
     async initUpload(viewer: Viewer, file: { name: string; size: number; type: string }, origin?: string) {
+      mustParticipate(viewer)
       const c = classifyFile(file)
       if (!c.ok) throw new AppError('invalido', c.reason)
       const mime = file.type || (c.kind === 'photo' ? 'image/heic' : 'video/quicktime')
@@ -99,6 +104,7 @@ export function createMediaService(deps: MediaServiceDeps) {
     },
 
     async register(viewer: Viewer, input: RegisterInput): Promise<Media> {
+      mustParticipate(viewer)
       await deps.storage.makePublic(input.driveFileId)
       const media: Media = {
         id: newId(),
@@ -141,6 +147,7 @@ export function createMediaService(deps: MediaServiceDeps) {
     },
 
     async toggleLike(viewer: Viewer, mediaId: string) {
+      mustParticipate(viewer)
       await mustFind(mediaId)
       const liked = await deps.likes.toggle(viewer.id, mediaId)
       const count = await deps.media.increment(mediaId, 'likesCount', liked ? 1 : -1)
@@ -148,6 +155,7 @@ export function createMediaService(deps: MediaServiceDeps) {
     },
 
     async addComment(viewer: Viewer, mediaId: string, input: CommentInput): Promise<Comment> {
+      mustParticipate(viewer)
       const v = validateComment(input)
       if (!v.ok) throw new AppError('invalido', v.error)
       await mustFind(mediaId)
@@ -158,6 +166,7 @@ export function createMediaService(deps: MediaServiceDeps) {
     },
 
     async editComment(viewer: Viewer, commentId: string, text: string) {
+      mustParticipate(viewer)
       const c = await mustFindComment(commentId)
       if (!canEditComment(viewer, c)) throw new AppError('prohibido', 'Solo el autor puede editar su comentario')
       const v = validateComment({ text, sticker: c.sticker })
@@ -166,6 +175,7 @@ export function createMediaService(deps: MediaServiceDeps) {
     },
 
     async deleteComment(viewer: Viewer, commentId: string) {
+      mustParticipate(viewer)
       const c = await mustFindComment(commentId)
       if (!canDeleteComment(viewer, c)) throw new AppError('prohibido', 'No puedes borrar este comentario')
       await deps.comments.remove(commentId)
@@ -193,6 +203,7 @@ export function createMediaService(deps: MediaServiceDeps) {
     },
 
     async remove(viewer: Viewer, mediaId: string) {
+      mustParticipate(viewer)
       const m = await mustFind(mediaId)
       if (viewer.role !== 'admin' && viewer.id !== m.guestId) throw new AppError('prohibido', 'Solo puedes borrar tus propios recuerdos')
       await deps.storage.remove(m.driveFileId)

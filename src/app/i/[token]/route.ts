@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getContainer } from '@/server/container'
-import { setGuestCookie } from '@/server/http'
+import { requestTime, setGuestCookie } from '@/server/http'
 
 export async function GET(req: NextRequest, ctx: { params: Promise<{ token: string }> }) {
+  await requestTime()
   const { token } = await ctx.params
   const app = await getContainer()
   const guest = await app.guests.loginWithToken(token)

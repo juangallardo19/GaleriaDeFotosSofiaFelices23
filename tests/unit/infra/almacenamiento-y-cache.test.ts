@@ -35,6 +35,7 @@ describe('Caché para que lo ya visto no vuelva a cargar lento', () => {
   it.each([
     ['https://abc.public.blob.vercel-storage.com/thumbs/x.webp', 'GET', 'cache-first'],
     ['/assets/sofi.webp', 'GET', 'cache-first'],
+    ['/api/miniaturas/thumbs/x.webp', 'GET', 'cache-first'],
     ['/_next/static/chunks/main.js', 'GET', 'cache-first'],
     ['/api/media?sort=recientes', 'GET', 'stale-while-revalidate'],
     ['/api/media/123/like', 'POST', 'network-only'],

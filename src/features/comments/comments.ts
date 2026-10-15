@@ -25,7 +25,7 @@ export function validateComment(input: CommentInput): { ok: true; value: { text:
 
 export interface CommentActor {
   id: string
-  role: 'guest' | 'admin'
+  role: 'guest' | 'admin' | 'visitor'
 }
 
 export function canEditComment(actor: CommentActor, comment: { guestId: string }): boolean {

@@ -1,10 +1,11 @@
 import { z } from 'zod'
 import { MAX_FILE_BYTES } from '@/features/media/media-kind'
+import { THUMB_ROUTE } from '@/server/storage/thumbs'
 
 const httpsOrLocal = z
   .string()
   .max(2000)
-  .refine((v) => v.startsWith('https://') || v.startsWith('/assets/') || v.startsWith('data:image/'), 'URL inválida')
+  .refine((v) => v.startsWith('https://') || v.startsWith('/assets/') || v.startsWith(`${THUMB_ROUTE}/`) || v.startsWith('data:image/'), 'URL inválida')
 
 export const InitUploadBody = z.object({
   name: z.string().min(1).max(300),

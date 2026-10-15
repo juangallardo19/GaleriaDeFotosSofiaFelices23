@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
-import { parseBody, requireViewer, route, type IdContext } from '@/server/http'
+import { parseBody, requireViewer, route, viewerOrVisitor, type IdContext } from '@/server/http'
 import { toPublicComment } from '@/server/serialize'
 import { CommentBody } from '@/server/validation'
 
 export const GET = route<IdContext>(async (req, app, ctx) => {
-  await requireViewer(req, app)
+  const viewer = await viewerOrVisitor(req, app)
   const { id } = await ctx.params
+  await app.media.get(viewer, id)
   return NextResponse.json({ items: (await app.media.listComments(id)).map(toPublicComment) })
 })
 

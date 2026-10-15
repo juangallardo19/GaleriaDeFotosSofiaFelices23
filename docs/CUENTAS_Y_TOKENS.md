@@ -10,6 +10,8 @@ Todo va en el archivo `.env.local` de tu computador (no se sube a GitHub) y lueg
 ## 2. Base de datos y miniaturas (en Vercel)
 1. Proyecto → *Storage → Create → Neon (Postgres)* → plan gratis → conectar al proyecto. Queda `DATABASE_URL`.
 2. *Storage → Create → Blob* → conectar. Queda `BLOB_READ_WRITE_TOKEN`.
+   - Si el almacén se creó **privado** (el actual), `BLOB_ACCESS=private`: las miniaturas las sirve el sitio en `/api/miniaturas/...` solo a quien tenga sesión.
+   - Si se crea **público**, `BLOB_ACCESS=public`: las miniaturas salen directo del CDN de Vercel.
 3. Copia ambas variables a tu `.env.local` (*Storage → .env.local → Copy*).
 
 ## 3. Google Cloud (Drive y correo) con la cuenta del álbum

@@ -15,7 +15,7 @@ function readEnv() {
     readFileSync(ENV_FILE, 'utf8')
       .split(/\r?\n/)
       .filter((l) => l.includes('=') && !l.trim().startsWith('#'))
-      .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
+      .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim().replace(/^(['"])(.*)\1$/, '$2')]),
   )
 }
 
@@ -73,5 +73,5 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log('Abriendo el navegador para autorizar la cuenta del álbum...')
   console.log('Si no se abre, copia este enlace:\n' + authUrl)
   const opener = process.platform === 'win32' ? `start "" "${authUrl}"` : process.platform === 'darwin' ? `open "${authUrl}"` : `xdg-open "${authUrl}"`
-  exec(opener)
+  if (process.env.NO_OPEN !== '1') exec(opener)
 })

@@ -6,9 +6,19 @@
   },
   "item": [
     {
-      "name": "Galería sin sesión responde 401",
+      "name": "Galería sin sesión: el visitante la ve",
       "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/media" },
-      "event": [{ "listen": "test", "script": { "exec": ["pm.test('401 sin sesión', () => pm.response.to.have.status(401));"] } }]
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 como visitante', () => pm.response.to.have.status(200));"] } }]
+    },
+    {
+      "name": "Visitante sin QR no puede subir",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"name\":\"a.jpg\",\"size\":10,\"type\":\"image/jpeg\"}" },
+        "url": "{{baseUrl}}/api/uploads/init"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('401 sin QR', () => pm.response.to.have.status(401));"] } }]
     },
     {
       "name": "QR inválido redirige a /qr-invalido",

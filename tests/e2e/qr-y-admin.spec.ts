@@ -19,9 +19,12 @@ test.describe('Invitado', () => {
     await expect(page.getByRole('heading', { name: 'Uy, este código no funciona' })).toBeVisible()
   })
 
-  test('sin haber escaneado no puede ver el álbum', async ({ page }) => {
+  test('RF-18 · sin QR entra como visitante: ve el álbum pero no puede subir', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveURL(/\/qr-invalido$/)
+    await expect(page).toHaveURL(/\/$/)
+    await expect(page.getByText('Para subir, comentar o dar like, escanea el QR de tu tarjeta')).toBeVisible()
+    await page.goto('/subir')
+    await expect(page).toHaveURL(/\/$/)
   })
 
   test('el menú tiene las secciones del invitado y no el admin', async ({ page }) => {

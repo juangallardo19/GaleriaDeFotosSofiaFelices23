@@ -81,9 +81,9 @@ describe('RF-14 · login del admin en /admin', () => {
 })
 
 describe('API de la galería', () => {
-  it('sin sesión responde 401', async () => {
+  it('RF-18 · sin sesión se ve como visitante', async () => {
     const res = await listarMedios(new NextRequest(`${BASE}/api/media`))
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(200)
   })
 
   it('con la sesión del QR lista los recuerdos con cursor', async () => {

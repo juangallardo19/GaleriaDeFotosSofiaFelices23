@@ -7,7 +7,7 @@ import {
   MemoryMediaRepository,
   MemorySettingsRepository,
 } from '@/server/repositories/memory'
-import type { Viewer } from '@/server/domain'
+import { VISITOR, type Viewer } from '@/server/domain'
 import { FakeMailer, FakeStorage, clock, sequentialIds } from '../helpers/fakes'
 
 async function setup() {
@@ -187,5 +187,46 @@ describe('Alerta de almacenamiento por correo', () => {
       throw new Error('Drive caído')
     }
     await expect(service.register(marta, photo())).resolves.toBeTruthy()
+  })
+})
+
+describe('RF-18 · visitantes que entran por el enlace normal (sin QR)', () => {
+  it('ven la galería, abren un recuerdo y lo descargan', async () => {
+    const { service, marta } = await setup()
+    const m = await service.register(marta, photo({ driveFileId: 'orig' }))
+    const page = await service.list(VISITOR, { sort: 'recientes' })
+    expect(page.items.map((x) => x.id)).toEqual([m.id])
+    expect(page.items[0]).toMatchObject({ likedByViewer: false, author: { name: 'Tía Marta' } })
+    expect((await service.get(VISITOR, m.id)).id).toBe(m.id)
+    expect(await service.registerDownload(m.id)).toBe('https://drive.fake/download/orig')
+  })
+
+  it('"mis recuerdos" y "mis likes" quedan vacíos', async () => {
+    const { service, marta } = await setup()
+    await service.register(marta, photo())
+    expect((await service.list(VISITOR, { sort: 'recientes', filter: { mine: true } })).items).toEqual([])
+    expect((await service.list(VISITOR, { sort: 'recientes', filter: { liked: true } })).items).toEqual([])
+  })
+
+  it('no ven lo que el admin ocultó', async () => {
+    const { service, marta, admin } = await setup()
+    const m = await service.register(marta, photo())
+    await service.setHidden(admin, m.id, true)
+    expect((await service.list(VISITOR, { sort: 'recientes', filter: { includeHidden: true } })).items).toEqual([])
+    await expect(service.get(VISITOR, m.id)).rejects.toMatchObject({ code: 'no-encontrado' })
+  })
+
+  it('no pueden subir, dar like, comentar ni borrar', async () => {
+    const { service, marta } = await setup()
+    const m = await service.register(marta, photo())
+    const cm = await service.addComment(marta, m.id, { text: 'Hola' })
+    await expect(service.initUpload(VISITOR, { name: 'a.jpg', size: 10, type: 'image/jpeg' })).rejects.toMatchObject({ code: 'prohibido' })
+    await expect(service.register(VISITOR, photo())).rejects.toMatchObject({ code: 'prohibido' })
+    await expect(service.toggleLike(VISITOR, m.id)).rejects.toMatchObject({ code: 'prohibido' })
+    await expect(service.addComment(VISITOR, m.id, { text: 'spam' })).rejects.toMatchObject({ code: 'prohibido' })
+    await expect(service.editComment(VISITOR, cm.id, 'x')).rejects.toMatchObject({ code: 'prohibido' })
+    await expect(service.deleteComment(VISITOR, cm.id)).rejects.toMatchObject({ code: 'prohibido' })
+    await expect(service.remove(VISITOR, m.id)).rejects.toMatchObject({ code: 'prohibido' })
+    expect((await service.list(marta, { sort: 'recientes' })).items[0]).toMatchObject({ likesCount: 0, commentsCount: 1 })
   })
 })

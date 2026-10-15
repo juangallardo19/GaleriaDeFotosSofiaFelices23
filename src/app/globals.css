@@ -1,26 +1,42 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-crema: #fff7f0;
+  --color-rosa: #fce1ea;
+  --color-vino: #5a1238;
+  --color-fucsia: #e6157a;
+  --color-rosa-vivo: #ff3fa4;
+  --color-oro: #d4af37;
+  --color-naranja: #ff8a1f;
+  --color-linea: #ebd3c8;
+
+  --font-sans: var(--font-montserrat), system-ui, sans-serif;
+  --font-serif: var(--font-radley), Georgia, serif;
+  --font-script: var(--font-pinyon), cursive;
+
+  --radius-boton: 16px;
+  --radius-chip: 14px;
+  --radius-card: 22px;
+  --radius-panel: 30px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background-color: var(--color-crema);
+  color: var(--color-vino);
+  font-family: var(--font-sans);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-crema);
+  background-image: url('/assets/papel.jpg');
+  background-size: 512px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

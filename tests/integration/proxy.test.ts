@@ -19,16 +19,20 @@ const redirectedTo = (res: Response) => (res.headers.get('location') ? new URL(r
 const passes = (res: Response) => res.headers.get('x-middleware-next') === '1'
 
 describe('Protección de páginas (proxy)', () => {
-  it.each(['/', '/bienvenida', '/subir', '/mis-recuerdos', '/mis-likes', '/descargar'])('%s sin QR escaneado va a /qr-invalido', async (path) => {
-    expect(redirectedTo(await run(path))).toBe('/qr-invalido')
+  it.each(['/', '/descargar'])('RF-18 · %s sin QR se ve como visitante', async (path) => {
+    expect(passes(await run(path))).toBe(true)
+  })
+
+  it.each(['/bienvenida', '/subir', '/mis-recuerdos', '/mis-likes'])('RF-18 · %s sin QR lleva al álbum', async (path) => {
+    expect(redirectedTo(await run(path))).toBe('/')
   })
 
   it.each(['/', '/subir', '/mis-likes'])('%s con la sesión del QR pasa', async (path) => {
     expect(passes(await run(path, guestCookie))).toBe(true)
   })
 
-  it('una cookie falsificada no pasa', async () => {
-    expect(redirectedTo(await run('/', `${GUEST_COOKIE}=falsa.firma`))).toBe('/qr-invalido')
+  it('una cookie falsificada no da permisos de invitado', async () => {
+    expect(redirectedTo(await run('/subir', `${GUEST_COOKIE}=falsa.firma`))).toBe('/')
   })
 
   it('el admin también puede ver el álbum', async () => {

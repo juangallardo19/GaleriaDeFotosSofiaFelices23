@@ -3,12 +3,12 @@ import { isSortKey } from '@/features/gallery/sort'
 import type { GalleryFilter } from '@/features/gallery/types'
 import type { MediaKind } from '@/features/media/media-kind'
 import { AppError } from '@/server/errors'
-import { parseBody, requireViewer, route } from '@/server/http'
+import { parseBody, requireViewer, route, viewerOrVisitor } from '@/server/http'
 import { toPublicMedia } from '@/server/serialize'
 import { RegisterBody } from '@/server/validation'
 
 export const GET = route(async (req, app) => {
-  const viewer = await requireViewer(req, app)
+  const viewer = await viewerOrVisitor(req, app)
   const q = req.nextUrl.searchParams
   const sort = q.get('sort') ?? 'recientes'
   if (!isSortKey(sort)) throw new AppError('invalido', 'Orden desconocido')

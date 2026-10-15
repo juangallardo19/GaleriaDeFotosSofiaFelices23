@@ -134,6 +134,13 @@ describe('RF-12 · ver una foto o un video', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
+  it('RF-18 · el visitante puede descargar pero no dar like', () => {
+    render(<MediaViewer media={viewerMedia()} readOnly onClose={() => {}} onPrev={() => {}} onNext={() => {}} onToggleLike={() => {}} />)
+    expect(screen.getByRole('link', { name: 'Descargar · 12' })).toHaveAttribute('href', '/api/media/m1/download')
+    expect(screen.queryByRole('button', { name: /Me gusta/ })).toBeNull()
+    expect(screen.getByText('Para subir, comentar o dar like, escanea el QR de tu tarjeta')).toBeInTheDocument()
+  })
+
   it('el like funciona desde el detalle', async () => {
     const onToggleLike = vi.fn()
     render(<MediaViewer media={viewerMedia({ likedByViewer: true })} onClose={() => {}} onPrev={() => {}} onNext={() => {}} onToggleLike={onToggleLike} />)
@@ -221,6 +228,13 @@ describe('Descargar el álbum', () => {
     expect(screen.getByRole('radio', { name: /Mis recuerdos.*12 recuerdos/ })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: /Mis likes.*30 recuerdos/ })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Abrir en Google Drive' })).toHaveAttribute('href', 'https://drive.google.com/drive/folders/x')
+  })
+
+  it('RF-18 · al visitante solo le ofrece todo el álbum o solo fotos', () => {
+    render(<DownloadSheet open readOnly folderUrl="https://drive.google.com/drive/folders/x" onClose={() => {}} stats={{ total: 128, totalBytes: 3.4 * 1024 ** 3, photos: 110, photosBytes: 820 * 1024 ** 2, mine: 0, liked: 0 }} />)
+    expect(screen.getAllByRole('radio')).toHaveLength(2)
+    expect(screen.queryByRole('radio', { name: /Mis recuerdos/ })).toBeNull()
+    expect(screen.queryByRole('radio', { name: /Mis likes/ })).toBeNull()
   })
 })
 

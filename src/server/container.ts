@@ -11,7 +11,7 @@ import type { CommentRepository, GuestRepository, LikeRepository, MediaRepositor
 import { createGuestService, type GuestService } from './services/guest-service'
 import { createMediaService, type MediaService } from './services/media-service'
 import { DevStorage } from './storage/dev'
-import { BlobThumbStore, InlineThumbStore, type ThumbStore } from './storage/thumbs'
+import { BlobThumbStore, InlineThumbStore, blobAccess, type ThumbStore } from './storage/thumbs'
 import type { StorageProvider } from './storage/types'
 import type { CardArt } from '@/features/admin/cards-pdf'
 
@@ -101,7 +101,7 @@ async function createDefaultContainer(): Promise<AppContainer> {
   // Sin base de datos: modo local en memoria (desarrollo y pruebas E2E)
   const repos = memoryRepos()
   if (process.env.E2E_SEED === '1') await repos.guests.create({ name: 'Tía Marta', token: E2E_TOKEN })
-  const thumbs = process.env.BLOB_READ_WRITE_TOKEN ? new BlobThumbStore() : new InlineThumbStore()
+  const thumbs = process.env.BLOB_READ_WRITE_TOKEN ? new BlobThumbStore({ access: blobAccess(process.env.BLOB_ACCESS) }) : new InlineThumbStore()
   return buildContainer({ repos, storage: new DevStorage(), thumbs, mailer: new ConsoleMailer(), config })
 }
 

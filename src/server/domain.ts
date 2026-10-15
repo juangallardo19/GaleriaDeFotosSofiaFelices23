@@ -46,7 +46,10 @@ export interface CommentView extends Comment {
 
 export interface Viewer {
   id: string
-  role: 'guest' | 'admin'
+  role: 'guest' | 'admin' | 'visitor'
 }
 
 export const ADMIN_VIEWER_ID = 'admin'
+
+// Quien entra por el enlace normal, sin QR: solo ve y descarga
+export const VISITOR: Viewer = { id: 'visitante', role: 'visitor' }

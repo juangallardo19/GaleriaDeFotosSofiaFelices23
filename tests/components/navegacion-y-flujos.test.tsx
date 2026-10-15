@@ -40,6 +40,13 @@ describe('RF-13 · menú lateral', () => {
     render(<SideMenu open={false} current="/" onClose={() => {}} />)
     expect(screen.queryByRole('navigation', { name: 'Menú principal' })).toBeNull()
   })
+
+  it('RF-18 · al visitante sin QR solo le muestra Inicio y Descargar álbum', () => {
+    render(<SideMenu open readOnly current="/" onClose={() => {}} />)
+    const links = within(screen.getByRole('navigation', { name: 'Menú principal' })).getAllByRole('link')
+    expect(links.map((l) => l.getAttribute('href'))).toEqual(['/', '/descargar'])
+    expect(screen.getByText('Para subir, comentar o dar like, escanea el QR de tu tarjeta')).toBeInTheDocument()
+  })
 })
 
 describe('RF-01b · bienvenida al escanear el QR', () => {
@@ -169,5 +176,10 @@ describe('RF-02 · pantalla de QR inválido', () => {
     render(<QrInvalidoPage />)
     expect(screen.getByRole('heading', { name: 'Uy, este código no funciona' })).toBeInTheDocument()
     expect(screen.getByText(/Busca a los anfitriones/)).toBeInTheDocument()
+  })
+
+  it('RF-18 · igual se puede ver el álbum sin QR', () => {
+    render(<QrInvalidoPage />)
+    expect(screen.getByRole('link', { name: 'Ver el álbum' })).toHaveAttribute('href', '/')
   })
 })

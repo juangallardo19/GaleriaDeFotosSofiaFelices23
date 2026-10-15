@@ -89,6 +89,12 @@ describe('RF-05 · card de la galería', () => {
     expect(onOpen).toHaveBeenCalledWith('m1')
   })
 
+  it('RF-18 · al visitante le muestra los likes pero no le deja dar like', () => {
+    render(<MediaCard media={media()} readOnly onOpen={() => {}} onToggleLike={() => {}} />)
+    expect(screen.getByLabelText('24 me gusta')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Me gusta' })).toBeNull()
+  })
+
   it('a veces lleva cinta washi', () => {
     const { rerender } = render(<MediaCard media={media()} onOpen={() => {}} onToggleLike={() => {}} tape="top" />)
     expect(screen.getByTestId('washi-tape')).toBeInTheDocument()

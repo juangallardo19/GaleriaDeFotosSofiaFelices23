@@ -97,7 +97,7 @@ describe('RF-06 · subir recuerdos', () => {
     const res = await subirMiniatura(req('/api/uploads/thumb?variant=thumb', { method: 'POST', body: new Uint8Array(50_000), headers: { 'content-type': 'image/webp' } }))
     expect(res.status).toBe(200)
     const { url } = await res.json()
-    expect(url).toMatch(/^https:\/\/thumbs\.fake\//)
+    expect(url).toMatch(/^\/api\/miniaturas\/thumbs\//)
     expect(app.thumbs.saved[0]).toMatchObject({ contentType: 'image/webp', size: 50_000, variant: 'thumb' })
   })
 

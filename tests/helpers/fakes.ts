@@ -32,9 +32,17 @@ export class FakeStorage implements StorageProvider {
 
 export class FakeThumbStore implements ThumbStore {
   saved: { contentType: string; size: number; variant: ThumbVariant }[] = []
+  files = new Map<string, { data: ArrayBuffer; contentType: string }>()
   async put(input: { data: ArrayBuffer; contentType: string; variant: ThumbVariant }) {
     this.saved.push({ contentType: input.contentType, size: input.data.byteLength, variant: input.variant })
-    return `https://thumbs.fake/${input.variant}-${this.saved.length}.webp`
+    const path = `${input.variant}s/fake-${this.saved.length}.webp`
+    this.files.set(path, { data: input.data, contentType: input.contentType })
+    return `/api/miniaturas/${path}`
+  }
+  async read(path: string) {
+    const file = this.files.get(path)
+    if (!file) return null
+    return { body: new Blob([file.data]).stream(), contentType: file.contentType, size: file.data.byteLength }
   }
 }
 

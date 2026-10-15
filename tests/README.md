@@ -28,10 +28,11 @@ Se escribieron **antes del código** (TDD): primero en rojo y luego se implement
 | RF-13 Menú sin admin | `components/navegacion-y-flujos`, `e2e` |
 | RF-14 Admin en /admin, QR y PDF | `unit/admin/*`, `integration/rutas`, `integration/api-completa`, `integration/proxy`, `components/admin-y-hooks`, `e2e` |
 | RF-15 Moderación | `integration/servicio-medios`, `integration/api-completa` |
+| RF-18 Visitantes sin QR (solo ver y descargar) | `integration/visitantes`, `integration/servicio-medios`, `integration/proxy`, `integration/miniaturas`, `components/*` (readOnly), `e2e` |
 | Fotos nuevas en vivo | `unit/gallery/vivo-y-presencia`, `components/galeria` (NewItemsPill) |
 | Personas viendo el álbum | `unit/gallery/vivo-y-presencia`, `integration/rutas`, `components/galeria` |
 | Alerta de almacenamiento por correo | `unit/infra/almacenamiento-y-cache`, `integration/servicio-medios`, `unit/infra/google` (Gmail) |
-| RNF-01/02/03 Skeleton, color e miniaturas | `unit/media/archivos`, `components/galeria` |
+| RNF-01/02/03 Skeleton, color e miniaturas | `unit/media/archivos`, `unit/infra/miniaturas-blob`, `integration/miniaturas`, `components/galeria` |
 | RNF-04 Paginación por cursor | `unit/gallery`, `integration/contrato-repositorios` (memoria y Postgres) |
 | RNF-06 Subida reanudable | `unit/upload/partes-y-eta`, `unit/upload/subida-drive` |
 | RNF-08/09 Cola, progreso, segundo plano | `unit/upload/cola`, `unit/upload/segundo-plano`, `components/admin-y-hooks` |

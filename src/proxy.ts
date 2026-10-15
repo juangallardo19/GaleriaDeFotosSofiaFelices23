@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { ADMIN_COOKIE, GUEST_COOKIE, verifySession, type Role } from '@/features/auth/session'
 
-const GUEST_PAGES = ['/bienvenida', '/subir', '/mis-recuerdos', '/mis-likes', '/descargar']
+// El álbum y la descarga quedan abiertos a visitantes; estas páginas son para quien tiene QR
+const GUEST_PAGES = ['/bienvenida', '/subir', '/mis-recuerdos', '/mis-likes']
 
 function isGuestPage(pathname: string) {
-  return pathname === '/' || GUEST_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+  return GUEST_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`))
 }
 
 async function hasSession(req: NextRequest, cookie: string, role: Role) {
@@ -22,7 +23,7 @@ export async function proxy(req: NextRequest) {
   const isAdmin = await hasSession(req, ADMIN_COOKIE, 'admin')
   if (pathname === '/admin') return isAdmin ? to(req, '/admin/invitados') : NextResponse.next()
   if (pathname.startsWith('/admin/')) return isAdmin ? NextResponse.next() : to(req, '/admin')
-  if (isGuestPage(pathname) && !isAdmin && !(await hasSession(req, GUEST_COOKIE, 'guest'))) return to(req, '/qr-invalido')
+  if (isGuestPage(pathname) && !isAdmin && !(await hasSession(req, GUEST_COOKIE, 'guest'))) return to(req, '/')
   return NextResponse.next()
 }
 

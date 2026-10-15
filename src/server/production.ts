@@ -5,7 +5,7 @@ import { GmailMailer } from './mail/gmail'
 import { ConsoleMailer } from './mail/types'
 import { createPostgresRepos } from './repositories/postgres'
 import { GoogleDriveStorage } from './storage/google-drive'
-import { BlobThumbStore } from './storage/thumbs'
+import { BlobThumbStore, blobAccess } from './storage/thumbs'
 
 function required(name: string): string {
   const value = process.env[name]
@@ -22,7 +22,7 @@ export async function createProductionContainer(config: AppConfig): Promise<AppC
   const container = buildContainer({
     repos: await createPostgresRepos(required('DATABASE_URL')),
     storage: new GoogleDriveStorage({ auth, apiKey: required('GOOGLE_API_KEY') }),
-    thumbs: new BlobThumbStore(),
+    thumbs: new BlobThumbStore({ access: blobAccess(process.env.BLOB_ACCESS) }),
     mailer: process.env.GMAIL_SENDER ? new GmailMailer({ auth, from: process.env.GMAIL_SENDER }) : new ConsoleMailer(),
     config,
   })

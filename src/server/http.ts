@@ -1,15 +1,27 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, connection, type NextRequest } from 'next/server'
 import type { z } from 'zod'
 import { ADMIN_COOKIE, ADMIN_SESSION_MAX_AGE_S, GUEST_COOKIE, GUEST_SESSION_MAX_AGE_S, signSession, verifySession } from '@/features/auth/session'
 import { getContainer, type AppContainer } from './container'
-import { ADMIN_VIEWER_ID, type Viewer } from './domain'
+import { ADMIN_VIEWER_ID, VISITOR, type Viewer } from './domain'
 import { AppError } from './errors'
 
 export type IdContext = { params: Promise<{ id: string }> }
 
+// Las rutas dependen de cada petición: nunca se pre-renderizan en el build.
+// Fuera de un request de Next (pruebas unitarias) no hay nada que marcar.
+export async function requestTime() {
+  try {
+    await connection()
+  } catch (err) {
+    if (err instanceof Error && err.message.includes('outside a request scope')) return
+    throw err
+  }
+}
+
 // Envoltorio común: resuelve el contenedor y convierte errores en respuestas HTTP
 export function route<C = unknown>(handler: (req: NextRequest, app: AppContainer, ctx: C) => Promise<Response>) {
   return async (req: NextRequest, ctx: C = undefined as C): Promise<Response> => {
+    await requestTime()
     try {
       return await handler(req, await getContainer(), ctx)
     } catch (err) {
@@ -38,9 +50,17 @@ export async function readViewer(req: NextRequest, app: AppContainer): Promise<V
   return (await app.guests.findById(payload.sub)) ? { id: payload.sub, role: 'guest' } : null
 }
 
+export const NEEDS_QR = 'Para subir, comentar o dar like, escanea el QR de tu tarjeta'
+
+// Para leer el álbum: sin sesión se entra como visitante
+export async function viewerOrVisitor(req: NextRequest, app: AppContainer): Promise<Viewer> {
+  return (await readViewer(req, app)) ?? VISITOR
+}
+
+// Para participar (subir, comentar, dar like, borrar): hace falta el QR o ser admin
 export async function requireViewer(req: NextRequest, app: AppContainer): Promise<Viewer> {
   const viewer = await readViewer(req, app)
-  if (!viewer) throw new AppError('no-autorizado')
+  if (!viewer) throw new AppError('no-autorizado', NEEDS_QR)
   return viewer
 }
 
