@@ -62,6 +62,30 @@ describe('RF-14 · tabla de invitados', () => {
     expect(onDelete).toHaveBeenCalledWith('g1')
   })
 
+  it('el lápiz permite cambiar el nombre', async () => {
+    const onRename = vi.fn(async () => {})
+    render(<GuestTable rows={rows} onShowQr={() => {}} onDelete={() => {}} onRename={onRename} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Editar a Tía Marta' }))
+    const input = screen.getByRole('textbox', { name: 'Nuevo nombre de Tía Marta' })
+    expect(input).toHaveValue('Tía Marta')
+    await userEvent.clear(input)
+    await userEvent.type(input, 'Tía Marta Gómez')
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar nombre' }))
+    expect(onRename).toHaveBeenCalledWith('g1', 'Tía Marta Gómez')
+    expect(screen.queryByRole('textbox', { name: 'Nuevo nombre de Tía Marta' })).toBeNull()
+  })
+
+  it('al editar, vacío no se guarda y Escape cancela', async () => {
+    const onRename = vi.fn(async () => {})
+    render(<GuestTable rows={rows} onShowQr={() => {}} onDelete={() => {}} onRename={onRename} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Editar a Primo Andrés' }))
+    await userEvent.clear(screen.getByRole('textbox', { name: 'Nuevo nombre de Primo Andrés' }))
+    expect(screen.getByRole('button', { name: 'Guardar nombre' })).toBeDisabled()
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByRole('textbox', { name: 'Nuevo nombre de Primo Andrés' })).toBeNull()
+    expect(onRename).not.toHaveBeenCalled()
+  })
+
   it('si no confirma, no elimina', async () => {
     const onDelete = vi.fn()
     vi.spyOn(window, 'confirm').mockReturnValue(false)

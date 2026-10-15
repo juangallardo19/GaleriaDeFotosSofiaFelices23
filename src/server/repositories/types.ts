@@ -9,6 +9,7 @@ export interface GuestRepository {
   findByIds(ids: string[]): Promise<Guest[]>
   list(): Promise<Guest[]>
   remove(id: string): Promise<void>
+  rename(id: string, name: string): Promise<void>
   touch(id: string, at: Date): Promise<void>
   lastSeenAll(): Promise<(Date | null)[]>
 }

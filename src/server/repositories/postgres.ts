@@ -62,6 +62,9 @@ class PgGuestRepository implements GuestRepository {
   async remove(id: string) {
     await this.db.delete(guests).where(eq(guests.id, id))
   }
+  async rename(id: string, name: string) {
+    await this.db.update(guests).set({ name }).where(eq(guests.id, id))
+  }
   async touch(id: string, at: Date) {
     await this.db.update(guests).set({ lastSeenAt: at }).where(eq(guests.id, id))
   }

@@ -51,3 +51,29 @@ test('el admin elige varios recuerdos en Contenido y los oculta', async ({ page,
   await page.getByRole('button', { name: 'Ocultar' }).click()
   await expect(page.getByText('2 recuerdos ocultos')).toBeVisible()
 })
+
+test('el admin cambia el nombre de un invitado con el lápiz y el QR sigue siendo el mismo', async ({ page, baseURL }) => {
+  const nombre = `Editar ${Date.now()}`
+  const admin = await request.newContext({ baseURL })
+  await admin.post('/api/admin/login', { data: { password: ADMIN_PASSWORD } })
+  const { url } = await (await admin.post('/api/admin/guests', { data: { name: nombre } })).json()
+  await admin.dispose()
+
+  await page.goto('/admin')
+  await expect(async () => {
+    await page.getByLabel('Contraseña').fill(ADMIN_PASSWORD)
+    await page.getByRole('button', { name: 'Entrar' }).click()
+    await expect(page.getByRole('heading', { name: 'Invitados' })).toBeVisible({ timeout: 5000 })
+  }).toPass({ timeout: 30_000 })
+
+  await page.getByRole('searchbox', { name: 'Buscar invitado' }).fill(nombre)
+  await page.getByRole('button', { name: `Editar a ${nombre}` }).click()
+  const campo = page.getByRole('textbox', { name: `Nuevo nombre de ${nombre}` })
+  await campo.fill(`${nombre} Gómez`)
+  await campo.press('Enter')
+  await expect(page.getByRole('row', { name: new RegExp(`${nombre} Gómez`) })).toBeVisible()
+
+  await page.context().clearCookies()
+  await page.goto(url)
+  await expect(page.getByText(`${nombre} Gómez`)).toBeVisible()
+})

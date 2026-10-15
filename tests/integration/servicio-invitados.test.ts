@@ -43,6 +43,29 @@ describe('RF-14 · crear invitados', () => {
   })
 })
 
+describe('RF-14 · editar el nombre de un invitado', () => {
+  it('cambia el nombre y conserva el mismo QR', async () => {
+    const { service } = setup()
+    const { guest, url } = await service.create('Valeria (2)')
+    const renamed = await service.rename(guest.id, '  Valeria   Gómez ')
+    expect(renamed.name).toBe('Valeria Gómez')
+    expect(service.urlFor(renamed)).toBe(url)
+    expect((await service.list()).map((g) => g.name)).toEqual(['Valeria Gómez'])
+  })
+
+  it('valida el nombre nuevo', async () => {
+    const { service } = setup()
+    const { guest } = await service.create('Luis')
+    await expect(service.rename(guest.id, '   ')).rejects.toMatchObject({ code: 'invalido' })
+    await expect(service.rename(guest.id, 'x'.repeat(61))).rejects.toMatchObject({ code: 'invalido' })
+  })
+
+  it('si el invitado no existe avisa', async () => {
+    const { service } = setup()
+    await expect(service.rename('no-existe', 'Alguien')).rejects.toMatchObject({ code: 'no-encontrado' })
+  })
+})
+
 describe('RF-01/02 · entrar con el QR', () => {
   it('un token válido devuelve al invitado y registra su última visita', async () => {
     const { service, c } = setup()

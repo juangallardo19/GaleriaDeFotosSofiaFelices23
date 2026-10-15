@@ -84,6 +84,8 @@ describe.each(implementations)('Contrato de repositorios (%s)', { timeout: 30_00
     expect((await r.guests.findById(g.id))?.lastSeenAt).toEqual(at(5))
     expect(await r.guests.lastSeenAll()).toEqual([at(5)])
     expect((await r.guests.findByIds([g.id, 'nadie'])).map((x) => x.name)).toEqual(['Tía Marta'])
+    await r.guests.rename(g.id, 'Tía Marta Gómez')
+    expect(await r.guests.findById(g.id)).toMatchObject({ name: 'Tía Marta Gómez', token: 'T'.repeat(22) })
     await r.guests.remove(g.id)
     expect(await r.guests.list()).toEqual([])
   })

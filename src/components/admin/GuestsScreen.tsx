@@ -160,6 +160,11 @@ export function GuestsScreen() {
     setQr({ name: r.guest.name, url: r.url, qr: r.qr })
   }
 
+  async function rename(id: string, name: string) {
+    await postJson(`/api/admin/guests/${id}`, { name }, 'PATCH')
+    setRows((prev) => prev?.map((r) => (r.id === id ? { ...r, name } : r)) ?? prev)
+  }
+
   async function remove(id: string) {
     await api(`/api/admin/guests/${id}`, { method: 'DELETE' })
     refresh()
@@ -201,7 +206,7 @@ export function GuestsScreen() {
         </StatCard>
       </div>
       <div className="mt-7">
-        {rows ? <GuestTable rows={rows} onShowQr={showQr} onDelete={remove} /> : <div className="shimmer h-64 rounded-card" aria-hidden="true" />}
+        {rows ? <GuestTable rows={rows} onShowQr={showQr} onDelete={remove} onRename={rename} /> : <div className="shimmer h-64 rounded-card" aria-hidden="true" />}
       </div>
 
       <NewGuestDialog open={creating} create={create} onClose={() => setCreating(false)} />

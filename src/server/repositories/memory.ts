@@ -39,6 +39,10 @@ export class MemoryGuestRepository implements GuestRepository {
   async remove(id: string) {
     this.guests.delete(id)
   }
+  async rename(id: string, name: string) {
+    const g = this.guests.get(id)
+    if (g) g.name = name
+  }
   async touch(id: string, at: Date) {
     const g = this.guests.get(id)
     if (g) g.lastSeenAt = at

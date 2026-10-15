@@ -59,6 +59,15 @@ export function createGuestService(deps: GuestServiceDeps) {
       await deps.guests.remove(id)
     },
 
+    // El token no cambia: la tarjeta ya impresa sigue funcionando con el nombre nuevo
+    async rename(id: string, rawName: string): Promise<Guest> {
+      const name = cleanName(rawName)
+      const guest = await deps.guests.findById(id)
+      if (!guest) throw new AppError('no-encontrado', 'Ese invitado ya no existe')
+      await deps.guests.rename(id, name)
+      return { ...guest, name }
+    },
+
     async loginWithToken(token: string): Promise<Guest | null> {
       if (!isTokenFormatValid(token)) return null
       const guest = await deps.guests.findByToken(token)
