@@ -1,0 +1,119 @@
+{
+  "info": {
+    "name": "Álbum Sofi 23 · API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Pruebas de contrato de la API. Correr con: npx newman run tests/api/album-sofi.postman_collection.json -e tests/api/local.postman_environment.json"
+  },
+  "item": [
+    {
+      "name": "Galería sin sesión responde 401",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/media" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('401 sin sesión', () => pm.response.to.have.status(401));"] } }]
+    },
+    {
+      "name": "QR inválido redirige a /qr-invalido",
+      "protocolProfileBehavior": { "followRedirects": false },
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/i/esto-no-es-un-token" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('307 a /qr-invalido', () => {",
+              "  pm.response.to.have.status(307);",
+              "  pm.expect(pm.response.headers.get('Location')).to.include('/qr-invalido');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "QR válido crea sesión y redirige a /bienvenida",
+      "protocolProfileBehavior": { "followRedirects": false },
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/i/{{guestToken}}" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('307 a /bienvenida', () => {",
+              "  pm.response.to.have.status(307);",
+              "  pm.expect(pm.response.headers.get('Location')).to.include('/bienvenida');",
+              "});",
+              "pm.test('cookie de sesión HttpOnly', () => {",
+              "  const c = pm.response.headers.filter((h) => h.key.toLowerCase() === 'set-cookie').map((h) => h.value).join(';');",
+              "  pm.expect(c).to.include('sofi_session=');",
+              "  pm.expect(c.toLowerCase()).to.include('httponly');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Galería con sesión",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/media?sort=recientes&limit=24" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 con items y nextCursor', () => {",
+              "  pm.response.to.have.status(200);",
+              "  const b = pm.response.json();",
+              "  pm.expect(b).to.have.property('items').that.is.an('array');",
+              "  pm.expect(b).to.have.property('nextCursor');",
+              "});",
+              "pm.test('responde en menos de 800 ms', () => pm.expect(pm.response.responseTime).to.be.below(800));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orden inválido responde 400",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/media?sort=hackeado" },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('400', () => pm.response.to.have.status(400));"] } }]
+    },
+    {
+      "name": "Latido de presencia",
+      "request": { "method": "POST", "header": [], "url": "{{baseUrl}}/api/presence" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('devuelve el conteo y el texto', () => {",
+              "  pm.response.to.have.status(200);",
+              "  const b = pm.response.json();",
+              "  pm.expect(b.online).to.be.at.least(1);",
+              "  pm.expect(b.label).to.match(/viendo el álbum/);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin con contraseña incorrecta",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"password\":\"incorrecta\"}" },
+        "url": "{{baseUrl}}/api/admin/login"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }]
+    },
+    {
+      "name": "Login admin correcto",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"password\":\"{{adminPassword}}\"}" },
+        "url": "{{baseUrl}}/api/admin/login"
+      },
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('204 con cookie de admin', () => pm.response.to.have.status(204));"] } }]
+    }
+  ]
+}
