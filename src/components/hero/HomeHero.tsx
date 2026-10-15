@@ -24,12 +24,10 @@ export function HomeHero() {
             Angelito
           </Reveal>
         </h1>
-        <Reveal delay={320} variant="zoom" className="mt-1 flex items-center gap-2.5 text-oro">
-          <span aria-hidden="true" className="h-px w-12 bg-oro" />
-          <span aria-hidden="true" className="[animation:latido_1.6s_ease-in-out_infinite]">
-            <Icon name="heart" size={14} filled />
-          </span>
-          <span aria-hidden="true" className="h-px w-12 bg-oro" />
+        <Reveal delay={320} variant="zoom" className="mt-1 flex items-center gap-2.5 text-naranja">
+          <span aria-hidden="true" className="h-px w-12 bg-naranja" />
+          <Icon name="heart" size={14} filled />
+          <span aria-hidden="true" className="h-px w-12 bg-naranja" />
         </Reveal>
         <Reveal as="p" delay={420} className="mt-4 text-sm leading-relaxed opacity-85 md:text-base">
           Sube aquí las fotos y videos de la fiesta. Todo lo que compartas queda guardado para verlo, darle amor y descargarlo.

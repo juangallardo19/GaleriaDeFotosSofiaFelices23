@@ -47,7 +47,7 @@ export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B
   const frameWidth = media.width || 4
 
   return (
-    <article className="sombra-card group relative rounded-card border border-oro/35 bg-[#FFFDFB]/95 p-[7px] pb-2.5 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:rotate-[-0.6deg] hover:shadow-[0_18px_34px_rgb(90_18_56/0.16)]">
+    <article className="sombra-card group relative rounded-card border border-naranja/30 bg-[#FFFDFB]/95 p-[7px] pb-2.5 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:rotate-[-0.6deg] hover:shadow-[0_18px_34px_rgb(90_18_56/0.16)]">
       {tape && (
         <span
           data-testid="washi-tape"

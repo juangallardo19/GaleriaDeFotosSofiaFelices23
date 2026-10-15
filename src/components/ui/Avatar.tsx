@@ -12,7 +12,7 @@ export function Avatar({ name, size = 24 }: { name: string; size?: number }) {
   return (
     <span
       aria-hidden="true"
-      className="inline-flex shrink-0 items-center justify-center rounded-full border border-oro/70 font-semibold text-fucsia"
+      className="inline-flex shrink-0 items-center justify-center rounded-full border border-naranja/60 font-semibold text-fucsia"
       style={{ width: size, height: size, fontSize: Math.round(size * 0.38), backgroundColor: toneFor(name) }}
     >
       {initials(name)}

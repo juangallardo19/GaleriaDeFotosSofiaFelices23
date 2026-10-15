@@ -12,7 +12,7 @@ const BASE =
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'sombra-sticker bg-fucsia text-white hover:bg-rosa-vivo',
-  secondary: 'border-[1.5px] border-fucsia bg-crema text-fucsia shadow-[0_3px_0_rgb(230_21_122/0.22)] [--costura:rgb(212_175_55/0.8)] hover:bg-rosa',
+  secondary: 'border-[1.5px] border-fucsia bg-crema text-fucsia shadow-[0_3px_0_rgb(230_21_122/0.22)] [--costura:rgb(255_138_31/0.8)] hover:bg-rosa',
 }
 
 export function buttonClass(variant: ButtonVariant = 'primary', extra?: string) {

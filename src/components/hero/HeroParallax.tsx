@@ -141,6 +141,7 @@ function placementVars(art: LayerArt): CSSProperties {
 export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
   const layers = useRef(new Map<string, HTMLDivElement>())
   const root = useRef<HTMLDivElement>(null)
+  const cue = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
     if (reducedMotion) {
@@ -152,6 +153,8 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
     const update = () => {
       frame = 0
       const y = window.scrollY
+      // La invitación a deslizar se desvanece apenas la persona empieza a bajar
+      if (cue.current) cue.current.style.opacity = String(Math.max(0, 1 - y / 140))
       const limit = (root.current?.offsetHeight ?? 1000) * 1.2
       if (y > limit) return
       for (const layer of HERO_LAYERS) {
@@ -235,12 +238,22 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
       </div>
       <a
         href="#galeria"
-        className="entrada absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-chip border border-fucsia/25 bg-crema/85 px-3.5 py-1.5 text-xs font-semibold text-fucsia transition-colors [--retraso:1200ms] hover:bg-rosa"
+        aria-label="Desliza para ver los recuerdos"
+        className="entrada absolute bottom-2 left-1/2 -translate-x-1/2 p-2 transition-transform duration-300 [--retraso:1300ms] hover:scale-110"
       >
-        Desliza
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="animate-bounce text-naranja">
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <span ref={cue} data-testid="indicador-deslizar" aria-hidden="true" className="flex flex-col items-center gap-1 transition-opacity duration-300">
+          <span className="flex h-[38px] w-6 justify-center rounded-full border-2 border-fucsia/70 bg-crema/80 pt-1.5 shadow-[0_2px_8px_rgb(90_18_56/0.12)]">
+            <span className="rueda block size-[5px] rounded-full bg-naranja" />
+          </span>
+          <span className="flex flex-col items-center text-naranja">
+            <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="cascada">
+              <path d="M2 2l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="cascada -mt-1 [animation-delay:0.25s]">
+              <path d="M2 2l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </span>
       </a>
     </div>
   )

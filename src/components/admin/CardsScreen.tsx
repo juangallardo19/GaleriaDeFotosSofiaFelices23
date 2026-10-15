@@ -82,7 +82,7 @@ export function CardsScreen() {
           </ul>
         </div>
         <div aria-hidden="true" className="mx-auto w-[260px]">
-          <div className="relative flex aspect-[10/14] flex-col items-center overflow-hidden rounded-xl border border-oro/50 bg-crema px-5 pt-4 text-center shadow-[0_14px_30px_rgb(90_18_56/0.15)] transition-transform duration-500 hover:-rotate-2 hover:scale-[1.04]">
+          <div className="relative flex aspect-[10/14] flex-col items-center overflow-hidden rounded-xl border border-naranja/50 bg-crema px-5 pt-4 text-center shadow-[0_14px_30px_rgb(90_18_56/0.15)] transition-transform duration-500 hover:-rotate-2 hover:scale-[1.04]">
             <img src="/assets/banderines.webp" alt="" className="w-[92%]" />
             <p className="mt-2 text-[9px] font-semibold tracking-[0.18em]">CAPTURA TUS</p>
             <p className="-mt-1 font-script text-[30px] leading-tight text-fucsia">Recuerdos</p>
@@ -91,7 +91,7 @@ export function CardsScreen() {
               Gracias por estar en este día tan especial. Baila, come rico, toma muchas fotos y no te vayas sin abrazar a Sofi.
             </p>
             <div className="mt-2 flex w-full items-center gap-2 text-left">
-              <div className="grid size-[76px] shrink-0 grid-cols-5 grid-rows-5 gap-px rounded border border-oro/60 bg-white p-1.5">
+              <div className="grid size-[76px] shrink-0 grid-cols-5 grid-rows-5 gap-px rounded border border-naranja/60 bg-white p-1.5">
                 {Array.from({ length: 25 }, (_, i) => (
                   <span key={i} className={(i * 7) % 3 === 0 || i % 6 === 0 ? 'bg-vino' : ''} />
                 ))}

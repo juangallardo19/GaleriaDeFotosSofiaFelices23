@@ -69,7 +69,8 @@ const media = (id: string, guestId: string, p: Partial<Media> = {}): Media => ({
   ...p,
 })
 
-describe.each(implementations)('Contrato de repositorios (%s)', (_name, make) => {
+// PGlite arranca un Postgres completo: con todas las suites en paralelo puede tardar más de 10 s
+describe.each(implementations)('Contrato de repositorios (%s)', { timeout: 30_000 }, (_name, make) => {
   let r: Repos
   beforeEach(async () => {
     r = await make()

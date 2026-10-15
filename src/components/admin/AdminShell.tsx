@@ -32,11 +32,11 @@ export function AdminShell({ title, subtitle, actions, children }: Props) {
 
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
-      <aside className="border-b border-oro/40 bg-rosa/55 md:sticky md:top-0 md:flex md:h-dvh md:w-[232px] lg:w-[264px] md:shrink-0 md:flex-col md:border-b-0 md:border-r md:px-4 md:pb-6 md:pt-5">
+      <aside className="border-b border-naranja/40 bg-rosa/55 md:sticky md:top-0 md:flex md:h-dvh md:w-[232px] lg:w-[264px] md:shrink-0 md:flex-col md:border-b-0 md:border-r md:px-4 md:pb-6 md:pt-5">
         <div className="flex items-center justify-between px-4 pt-3 md:block md:px-3 md:pt-0">
           <p className="flex items-start gap-0.5">
             <span className="font-script text-[40px] leading-none text-fucsia md:text-[46px]">Sofi</span>
-            <span className="text-xs font-semibold text-oro">23</span>
+            <span className="text-xs font-semibold text-naranja">23</span>
           </p>
           <p className="text-[13px] font-semibold opacity-70 md:mt-3">Panel de anfitriones</p>
         </div>
@@ -51,7 +51,7 @@ export function AdminShell({ title, subtitle, actions, children }: Props) {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? 'page' : undefined}
-                className={`relative flex min-h-11 shrink-0 items-center gap-2.5 rounded-2xl px-3.5 text-sm transition-transform duration-200 hover:translate-x-1 md:text-[14.5px] ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(212_175_55/0.7)]' : 'font-medium hover:bg-crema/60'}`}
+                className={`relative flex min-h-11 shrink-0 items-center gap-2.5 rounded-2xl px-3.5 text-sm transition-transform duration-200 hover:translate-x-1 md:text-[14.5px] ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(255_138_31/0.7)]' : 'font-medium hover:bg-crema/60'}`}
               >
                 <Icon name={item.icon} size={19} strokeWidth={2} />
                 {item.label}

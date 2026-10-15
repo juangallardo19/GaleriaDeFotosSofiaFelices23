@@ -43,7 +43,7 @@ export function UploadPicker({ onSelect, disabled = false }: { onSelect: (files:
         </Reveal>
         <Reveal variant="der" delay={120}>
           <label
-            className={`${tile} border-[1.5px] border-fucsia bg-crema text-fucsia [--costura:rgb(212_175_55/0.8)] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
+            className={`${tile} border-[1.5px] border-fucsia bg-crema text-fucsia [--costura:rgb(255_138_31/0.8)] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
           >
             <span className="transition-transform duration-300 group-hover:rotate-6 group-hover:scale-125">
               <Icon name="camera" size={30} strokeWidth={1.8} />

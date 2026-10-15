@@ -13,7 +13,7 @@ export function Logo({ big = false }: { big?: boolean }) {
   return (
     <Link href="/" aria-label="Inicio del álbum de Sofi" className="flex items-start gap-0.5 transition-transform hover:-rotate-3 hover:scale-105">
       <span className={`font-script leading-none text-fucsia ${big ? 'text-[46px]' : 'text-[34px]'}`}>Sofi</span>
-      <span className={`font-semibold text-oro ${big ? 'text-[13px]' : 'text-[10px]'}`}>23</span>
+      <span className={`font-semibold text-naranja ${big ? 'text-[13px]' : 'text-[10px]'}`}>23</span>
     </Link>
   )
 }
@@ -27,7 +27,7 @@ export function AppHeader() {
 
   return (
     <>
-      <header className="papel sticky top-0 z-40 border-b border-oro/40 shadow-[0_4px_16px_rgb(90_18_56/0.06)]">
+      <header className="papel sticky top-0 z-40 border-b border-naranja/40 shadow-[0_4px_16px_rgb(90_18_56/0.06)]">
         <div className="mx-auto flex h-[66px] max-w-[1440px] items-center justify-between gap-4 px-3.5 md:px-8">
           <button
             type="button"

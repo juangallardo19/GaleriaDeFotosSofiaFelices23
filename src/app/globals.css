@@ -215,3 +215,36 @@ body::before {
     rotate: -4deg;
   }
 }
+
+/* Invitación a deslizar: la ruedita baja y las flechas se encienden en cascada */
+@keyframes rueda {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+}
+.rueda {
+  animation: rueda 1.8s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+}
+@keyframes cascada {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: translateY(-3px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
+}
+.cascada {
+  animation: cascada 1.8s ease-in-out infinite;
+}

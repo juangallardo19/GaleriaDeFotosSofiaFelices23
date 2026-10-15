@@ -41,7 +41,7 @@ export function GuestQr({ guest }: { guest: CreatedGuest }) {
       <a
         href={guest.qr}
         download={`QR - ${guest.name}.png`}
-        className="cosido relative inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-boton border-[1.5px] border-fucsia bg-crema px-4 text-sm font-semibold text-fucsia [--costura:rgb(212_175_55/0.8)]"
+        className="cosido relative inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-boton border-[1.5px] border-fucsia bg-crema px-4 text-sm font-semibold text-fucsia [--costura:rgb(255_138_31/0.8)]"
       >
         <Icon name="download" size={18} strokeWidth={2} />
         Descargar QR (PNG)

@@ -33,9 +33,12 @@ describe('Portada con parallax por capas', () => {
     for (const layer of HERO_LAYERS) expect(screen.getByTestId(`capa-${layer.id}`)).toHaveAttribute('data-static', 'true')
   })
 
-  it('invita a deslizar', () => {
+  it('invita a deslizar con una animación, sin texto visible', () => {
     render(<HeroParallax reducedMotion={false} />)
-    expect(screen.getByText('Desliza')).toBeInTheDocument()
+    const cue = screen.getByRole('link', { name: 'Desliza para ver los recuerdos' })
+    expect(cue).toHaveAttribute('href', '#galeria')
+    expect(within(cue).getByTestId('indicador-deslizar')).toBeInTheDocument()
+    expect(screen.queryByText('Desliza')).toBeNull()
   })
 })
 

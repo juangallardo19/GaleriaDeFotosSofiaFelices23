@@ -36,7 +36,7 @@ export function SideMenu({ open, current, onClose, readOnly = false, guestName }
         <div className="flex items-center justify-between">
           <p className="flex items-start gap-0.5">
             <span className="font-script text-[40px] leading-none text-fucsia">Sofi</span>
-            <span className="text-xs font-semibold text-oro">23</span>
+            <span className="text-xs font-semibold text-naranja">23</span>
           </p>
           <button type="button" aria-label="Cerrar menú" onClick={onClose} className="flex size-11 items-center justify-center rounded-[15px] border border-fucsia/30 bg-crema">
             <Icon name="close" size={20} strokeWidth={2} />
@@ -53,7 +53,7 @@ export function SideMenu({ open, current, onClose, readOnly = false, guestName }
                 onClick={onClose}
                 aria-current={active ? 'page' : undefined}
                 style={{ animationDelay: `${80 + i * 60}ms` }}
-                className={`aparecer relative flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-[15px] transition-transform duration-200 hover:translate-x-1 ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(212_175_55/0.7)]' : 'font-medium'}`}
+                className={`aparecer relative flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-[15px] transition-transform duration-200 hover:translate-x-1 ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(255_138_31/0.7)]' : 'font-medium'}`}
               >
                 <Icon name={item.icon} size={20} strokeWidth={2} />
                 {item.label}
