@@ -1,5 +1,5 @@
 import type { GoogleAuth } from '../google/auth'
-import type { StorageFolder, StorageProvider } from './types'
+import type { FolderLinks, StorageFolder, StorageProvider } from './types'
 
 export const ROOT_FOLDER_NAME = 'Álbum Sofi 23'
 const API = 'https://www.googleapis.com/drive/v3'
@@ -14,6 +14,7 @@ interface Folders {
 
 export class GoogleDriveStorage implements StorageProvider {
   private folders: Promise<Folders> | null = null
+  private links: Promise<FolderLinks> | null = null
   private readonly fetchFn: typeof fetch
 
   constructor(private readonly opts: { auth: GoogleAuth; apiKey: string; fetch?: typeof fetch }) {
@@ -53,6 +54,20 @@ export class GoogleDriveStorage implements StorageProvider {
       throw err
     })
     return this.folders
+  }
+
+  // Comparte la carpeta del álbum (y por herencia sus subcarpetas) para descargarla completa desde Drive
+  folderLinks(): Promise<FolderLinks> {
+    this.links ??= (async () => {
+      const f = await this.ensureFolders()
+      await this.makePublic(f.root)
+      const url = (id: string) => `https://drive.google.com/drive/folders/${id}`
+      return { all: url(f.root), photos: url(f.fotos), videos: url(f.videos) }
+    })().catch((err) => {
+      this.links = null
+      throw err
+    })
+    return this.links
   }
 
   async createUploadSession(input: { name: string; size: number; mime: string; folder: StorageFolder; origin?: string }) {

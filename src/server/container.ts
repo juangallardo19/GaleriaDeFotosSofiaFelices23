@@ -100,7 +100,10 @@ async function createDefaultContainer(): Promise<AppContainer> {
   }
   // Sin base de datos: modo local en memoria (desarrollo y pruebas E2E)
   const repos = memoryRepos()
-  if (process.env.E2E_SEED === '1') await repos.guests.create({ name: 'Tía Marta', token: E2E_TOKEN })
+  if (process.env.E2E_SEED === '1') {
+    const marta = await repos.guests.create({ name: 'Tía Marta', token: E2E_TOKEN })
+    if (process.env.DEMO_MEDIA === '1') await (await import('./dev-seed')).seedDemo(repos, marta.id)
+  }
   const thumbs = process.env.BLOB_READ_WRITE_TOKEN ? new BlobThumbStore({ access: blobAccess(process.env.BLOB_ACCESS) }) : new InlineThumbStore()
   return buildContainer({ repos, storage: new DevStorage(), thumbs, mailer: new ConsoleMailer(), config })
 }

@@ -40,3 +40,80 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Componentes propios en su capa: las utilidades de Tailwind (fixed, absolute…) pueden sobrescribirlos */
+@layer components {
+  /* Etiqueta cosida: costura punteada interior de botones y chips */
+  .cosido::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px dashed var(--costura, rgb(255 255 255 / 0.55));
+    border-radius: calc(var(--radius-boton) - 3px);
+    pointer-events: none;
+  }
+
+  .sombra-sticker {
+    box-shadow:
+      0 3px 0 rgb(90 18 56 / 0.3),
+      0 10px 20px rgb(230 21 122 / 0.16);
+  }
+
+  .sombra-card {
+    box-shadow: 0 10px 24px rgb(90 18 56 / 0.08);
+  }
+
+  .shimmer {
+    background: linear-gradient(100deg, #f1e2da 20%, #fbf2ec 40%, #f1e2da 60%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+/* Capas del parallax: posición del diseño en móvil (--m*) y escritorio (--d*) */
+.capa {
+  position: absolute;
+  left: var(--ml);
+  top: var(--mt);
+  width: var(--mw);
+  display: var(--mdisplay, block);
+}
+@media (min-width: 768px) {
+  .capa {
+    left: var(--dl);
+    top: var(--dt);
+    width: var(--dw);
+    display: var(--ddisplay, block);
+  }
+}
+
+@keyframes flotar {
+  50% {
+    translate: 0 -10px;
+  }
+}
+.flotar {
+  animation: flotar 5s ease-in-out infinite;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+.aparecer {
+  animation: aparecer 0.45s ease-out both;
+}
+
+.sin-scrollbar {
+  scrollbar-width: none;
+}
+.sin-scrollbar::-webkit-scrollbar {
+  display: none;
+}

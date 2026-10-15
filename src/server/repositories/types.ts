@@ -31,7 +31,7 @@ export interface MediaRepository {
   setHidden(id: string, hidden: boolean): Promise<void>
   increment(id: string, field: CounterField, by: number): Promise<number>
   remove(id: string): Promise<void>
-  stats(): Promise<{ count: number; photos: number; videos: number; bytes: number }>
+  stats(): Promise<{ count: number; photos: number; videos: number; bytes: number; photoBytes: number }>
   countByGuest(): Promise<Record<string, number>>
 }
 

@@ -94,6 +94,7 @@ export class MemoryMediaRepository implements MediaRepository {
       photos: all.filter((m) => m.kind === 'photo').length,
       videos: all.filter((m) => m.kind === 'video').length,
       bytes: all.reduce((s, m) => s + m.sizeBytes, 0),
+      photoBytes: all.filter((m) => m.kind === 'photo').reduce((s, m) => s + m.sizeBytes, 0),
     }
   }
 }

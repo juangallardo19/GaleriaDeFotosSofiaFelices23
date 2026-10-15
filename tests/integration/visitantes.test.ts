@@ -14,6 +14,7 @@ import { GET as descargar } from '@/app/api/media/[id]/download/route'
 import { PATCH as moderar } from '@/app/api/admin/media/[id]/route'
 import { GET as verMiniatura } from '@/app/api/miniaturas/[...ruta]/route'
 import { POST as presencia } from '@/app/api/presence/route'
+import { GET as resumen } from '@/app/api/media/resumen/route'
 import { ADMIN_COOKIE, GUEST_COOKIE } from '@/features/auth/session'
 import { TEST_ADMIN_PASSWORD, installTestContainer } from '../helpers/container'
 
@@ -76,6 +77,20 @@ describe('RF-18 · quien entra por el enlace normal puede ver y descargar', () =
     expect(res.status).toBe(302)
     const { media } = await (await verMedio(req(`/api/media/${mediaId}`), ctx(mediaId))).json()
     expect(media.downloadsCount).toBe(1)
+  })
+
+  it('RF-16 · ve el resumen para descargar y los enlaces de Drive', async () => {
+    const res = await resumen(req('/api/media/resumen'))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({
+      total: 1,
+      totalBytes: 1000,
+      photos: 1,
+      photosBytes: 1000,
+      mine: 0,
+      liked: 0,
+      folders: { all: 'https://drive.fake/carpeta', photos: 'https://drive.fake/carpeta/fotos', videos: 'https://drive.fake/carpeta/videos' },
+    })
   })
 
   it('ve cuántas personas están en el álbum sin contarse como invitado', async () => {

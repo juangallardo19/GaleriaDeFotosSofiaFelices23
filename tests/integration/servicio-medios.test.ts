@@ -190,6 +190,21 @@ describe('Alerta de almacenamiento por correo', () => {
   })
 })
 
+describe('RF-16 · resumen para descargar el álbum', () => {
+  it('cuenta todo, solo fotos, lo mío y mis likes', async () => {
+    const { service, marta, camilo } = await setup()
+    const a = await service.register(marta, photo({ sizeBytes: 100 }))
+    await service.register(marta, photo({ kind: 'video', sizeBytes: 900 }))
+    const c = await service.register(camilo, photo({ sizeBytes: 50 }))
+    await service.toggleLike(marta, c.id)
+    await service.toggleLike(camilo, a.id)
+    await service.toggleLike(camilo, c.id)
+    expect(await service.summary(marta)).toEqual({ total: 3, totalBytes: 1050, photos: 2, photosBytes: 150, mine: 2, liked: 1 })
+    expect(await service.summary(camilo)).toMatchObject({ mine: 1, liked: 2 })
+    expect(await service.summary(VISITOR)).toMatchObject({ total: 3, mine: 0, liked: 0 })
+  })
+})
+
 describe('RF-18 · visitantes que entran por el enlace normal (sin QR)', () => {
   it('ven la galería, abren un recuerdo y lo descargan', async () => {
     const { service, marta } = await setup()

@@ -122,6 +122,19 @@ describe('Google Drive (Adapter)', () => {
     expect(await drive.quota()).toEqual({ usedBytes: 1073741824, limitBytes: 16106127360 })
   })
 
+  it('comparte la carpeta del álbum una sola vez y da los enlaces de las carpetas', async () => {
+    const { drive, calls } = driveWithFolders()
+    const links = await drive.folderLinks()
+    await drive.folderLinks()
+    expect(links).toEqual({
+      all: 'https://drive.google.com/drive/folders/folder-1',
+      photos: 'https://drive.google.com/drive/folders/folder-2',
+      videos: 'https://drive.google.com/drive/folders/folder-3',
+    })
+    const shares = calls.filter((c) => c.url.includes('/permissions'))
+    expect(shares.map((c) => c.url)).toEqual(['https://www.googleapis.com/drive/v3/files/folder-1/permissions?fields=id'])
+  })
+
   it('borra archivos', async () => {
     const { drive, calls } = driveWithFolders()
     await drive.remove('file-1')

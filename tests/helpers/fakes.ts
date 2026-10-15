@@ -19,6 +19,9 @@ export class FakeStorage implements StorageProvider {
   downloadUrl(fileId: string) {
     return `https://drive.fake/download/${fileId}`
   }
+  async folderLinks() {
+    return { all: 'https://drive.fake/carpeta', photos: 'https://drive.fake/carpeta/fotos', videos: 'https://drive.fake/carpeta/videos' }
+  }
   streamUrl(fileId: string) {
     return `https://drive.fake/stream/${fileId}`
   }

@@ -27,12 +27,13 @@ test.describe('Invitado', () => {
     await expect(page).toHaveURL(/\/$/)
   })
 
-  test('el menú tiene las secciones del invitado y no el admin', async ({ page }) => {
+  test('el menú tiene las secciones del invitado y no el admin (lateral en celular, barra en escritorio)', async ({ page, isMobile }) => {
     await page.goto(`/i/${TOKEN}`)
     await page.waitForURL('/')
-    await page.getByRole('button', { name: 'Abrir menú' }).click()
-    const nav = page.getByRole('navigation', { name: 'Menú principal' })
+    if (isMobile) await page.getByRole('button', { name: 'Abrir menú' }).click()
+    const nav = page.getByRole('navigation', { name: isMobile ? 'Menú principal' : 'Navegación' })
     await expect(nav.getByRole('link')).toHaveText(['Inicio', 'Subir recuerdos', 'Mis recuerdos', 'Mis likes', 'Descargar álbum'])
+    await expect(page.locator('a[href^="/admin"]')).toHaveCount(0)
   })
 })
 

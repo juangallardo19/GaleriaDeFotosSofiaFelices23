@@ -44,3 +44,6 @@ next-env.d.ts
 /test-media/
 /playwright-report/
 /test-results/
+
+# Configuración local de herramientas
+/.claude/

@@ -8,4 +8,11 @@ export interface StorageProvider {
   streamUrl(fileId: string): string
   remove(fileId: string): Promise<void>
   quota(): Promise<{ usedBytes: number; limitBytes: number }>
+  folderLinks?(): Promise<FolderLinks>
+}
+
+export interface FolderLinks {
+  all: string
+  photos: string
+  videos: string
 }

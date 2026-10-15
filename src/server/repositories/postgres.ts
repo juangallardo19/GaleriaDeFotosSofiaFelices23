@@ -125,9 +125,10 @@ class PgMediaRepository implements MediaRepository {
         photos: sql<number>`(count(*) filter (where ${media.kind} = 'photo'))::int`,
         videos: sql<number>`(count(*) filter (where ${media.kind} = 'video'))::int`,
         bytes: sql<number>`coalesce(sum(${media.sizeBytes}), 0)::float8`,
+        photoBytes: sql<number>`coalesce(sum(${media.sizeBytes}) filter (where ${media.kind} = 'photo'), 0)::float8`,
       })
       .from(media)
-    return { count: Number(r.count), photos: Number(r.photos), videos: Number(r.videos), bytes: Number(r.bytes) }
+    return { count: Number(r.count), photos: Number(r.photos), videos: Number(r.videos), bytes: Number(r.bytes), photoBytes: Number(r.photoBytes) }
   }
   async countByGuest() {
     const rows = await this.db.select({ guestId: media.guestId, n: sql<number>`count(*)::int` }).from(media).groupBy(media.guestId)

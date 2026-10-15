@@ -2,6 +2,7 @@ import { NextResponse, connection, type NextRequest } from 'next/server'
 import type { z } from 'zod'
 import { ADMIN_COOKIE, ADMIN_SESSION_MAX_AGE_S, GUEST_COOKIE, GUEST_SESSION_MAX_AGE_S, signSession, verifySession } from '@/features/auth/session'
 import { getContainer, type AppContainer } from './container'
+import { NEEDS_QR } from '@/lib/messages'
 import { ADMIN_VIEWER_ID, VISITOR, type Viewer } from './domain'
 import { AppError } from './errors'
 
@@ -49,8 +50,6 @@ export async function readViewer(req: NextRequest, app: AppContainer): Promise<V
   // Un invitado eliminado por el admin pierde el acceso aunque conserve la cookie
   return (await app.guests.findById(payload.sub)) ? { id: payload.sub, role: 'guest' } : null
 }
-
-export const NEEDS_QR = 'Para subir, comentar o dar like, escanea el QR de tu tarjeta'
 
 // Para leer el álbum: sin sesión se entra como visitante
 export async function viewerOrVisitor(req: NextRequest, app: AppContainer): Promise<Viewer> {

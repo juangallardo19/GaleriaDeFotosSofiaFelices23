@@ -212,6 +212,11 @@ export function createMediaService(deps: MediaServiceDeps) {
     },
 
     stats: () => deps.media.stats(),
+
+    async summary(viewer: Viewer) {
+      const [s, byGuest, liked] = await Promise.all([deps.media.stats(), deps.media.countByGuest(), deps.likes.likedIds(viewer.id)])
+      return { total: s.count, totalBytes: s.bytes, photos: s.photos, photosBytes: s.photoBytes, mine: byGuest[viewer.id] ?? 0, liked: liked.size }
+    },
     uploadsByGuest: () => deps.media.countByGuest(),
     quota: () => deps.storage.quota(),
   }

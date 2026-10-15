@@ -114,7 +114,7 @@ describe.each(implementations)('Contrato de repositorios (%s)', (_name, make) =>
     expect(await r.media.increment('b', 'likesCount', 1)).toBe(1)
     expect(await r.media.increment('b', 'likesCount', -5)).toBe(0)
     expect((await r.media.newerThan(at(1), false)).map((m) => m.id)).toEqual(['b'])
-    expect(await r.media.stats()).toEqual({ count: 2, photos: 1, videos: 1, bytes: 300 })
+    expect(await r.media.stats()).toEqual({ count: 2, photos: 1, videos: 1, bytes: 300, photoBytes: 100 })
     expect(await r.media.countByGuest()).toEqual({ [g.id]: 2 })
     await r.media.remove('a')
     expect(await r.media.findById('a')).toBeNull()
