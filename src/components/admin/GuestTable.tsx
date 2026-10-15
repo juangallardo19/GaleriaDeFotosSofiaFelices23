@@ -28,9 +28,7 @@ export function GuestTable({ rows, onShowQr, onDelete }: Props) {
 
   const visible = useMemo(() => {
     const q = normalizeSearch(query)
-    return rows.filter(
-      (r) => (!q || normalizeSearch(r.name).includes(q)) && (filter === 'todos' || (filter === 'entraron' ? r.entered : !r.entered)),
-    )
+    return rows.filter((r) => (!q || normalizeSearch(r.name).includes(q)) && (filter === 'todos' || (filter === 'entraron' ? r.entered : !r.entered)))
   }, [rows, query, filter])
 
   const chip = (id: Filter, label: string) => (
@@ -71,40 +69,57 @@ export function GuestTable({ rows, onShowQr, onDelete }: Props) {
         <table className="w-full text-left text-sm">
           <thead className="bg-rosa/50 text-[12.5px] font-semibold">
             <tr>
-              <th scope="col" className="px-4 py-3 opacity-65">Invitado</th>
-              <th scope="col" className="px-4 py-3 opacity-65">Estado</th>
-              <th scope="col" className="hidden px-4 py-3 opacity-65 sm:table-cell">Recuerdos</th>
-              <th scope="col" className="px-4 py-3 text-right opacity-65">Acciones</th>
+              <th scope="col" className="px-4 py-3 opacity-65">
+                Invitado
+              </th>
+              <th scope="col" className="px-4 py-3 opacity-65">
+                Estado
+              </th>
+              <th scope="col" className="hidden px-4 py-3 opacity-65 sm:table-cell">
+                Recuerdos
+              </th>
+              <th scope="col" className="px-4 py-3 text-right opacity-65">
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody>
             {visible.map((r) => (
-              <tr key={r.id} className="border-t border-linea">
+              <tr key={r.id} className="border-t border-linea transition-colors hover:bg-rosa/30">
                 <td className="px-4 py-2.5">
                   <div className="flex items-center gap-3">
                     <span className="relative">
                       <Avatar name={r.name} size={34} />
-                      {r.online && <span title="En línea ahora" className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-white bg-[#2fb36b]" />}
+                      {r.online && (
+                        <span title="En línea ahora" className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-white bg-[#2fb36b]" />
+                      )}
                     </span>
                     <span className="font-semibold">{r.name}</span>
                   </div>
                 </td>
                 <td className="px-4 py-2.5">
-                  <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${r.entered ? 'bg-[#e3f5ea] text-[#23784a]' : 'bg-vino/8 opacity-70'}`}>
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${r.entered ? 'bg-[#e3f5ea] text-[#23784a]' : 'bg-vino/8 opacity-70'}`}
+                  >
                     {r.entered ? 'Entró' : 'Aún no entra'}
                   </span>
                 </td>
                 <td className="hidden px-4 py-2.5 sm:table-cell">{r.uploads}</td>
                 <td className="px-4 py-2.5">
                   <div className="flex justify-end gap-1.5">
-                    <button type="button" aria-label={`Ver QR de ${r.name}`} onClick={() => onShowQr(r.id)} className="flex size-10 items-center justify-center rounded-xl border border-fucsia/25 bg-crema">
+                    <button
+                      type="button"
+                      aria-label={`Ver QR de ${r.name}`}
+                      onClick={() => onShowQr(r.id)}
+                      className="flex size-10 items-center justify-center rounded-xl border border-fucsia/25 bg-crema transition-[transform,background-color] hover:scale-110 hover:bg-rosa active:scale-95"
+                    >
                       <Icon name="qr" size={17} strokeWidth={2} />
                     </button>
                     <button
                       type="button"
                       aria-label={`Eliminar a ${r.name}`}
                       onClick={() => window.confirm(`¿Eliminar a ${r.name}? Su QR dejará de funcionar.`) && onDelete(r.id)}
-                      className="flex size-10 items-center justify-center rounded-xl border border-fucsia/25 bg-crema"
+                      className="flex size-10 items-center justify-center rounded-xl border border-fucsia/25 bg-crema transition-[transform,background-color] hover:scale-110 hover:bg-rosa active:scale-95"
                     >
                       <Icon name="trash" size={17} strokeWidth={2} />
                     </button>
@@ -114,7 +129,9 @@ export function GuestTable({ rows, onShowQr, onDelete }: Props) {
             ))}
           </tbody>
         </table>
-        {visible.length === 0 && <p className="px-4 py-8 text-center text-sm opacity-65">{rows.length === 0 ? 'Todavía no hay invitados.' : 'Nadie coincide con la búsqueda.'}</p>}
+        {visible.length === 0 && (
+          <p className="px-4 py-8 text-center text-sm opacity-65">{rows.length === 0 ? 'Todavía no hay invitados.' : 'Nadie coincide con la búsqueda.'}</p>
+        )}
       </div>
     </div>
   )

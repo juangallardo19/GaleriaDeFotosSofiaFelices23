@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const blob = vi.hoisted(() => ({ put: vi.fn(), get: vi.fn() }))
+const blob = vi.hoisted(() => ({ put: vi.fn(), get: vi.fn(), del: vi.fn() }))
 vi.mock('@vercel/blob', () => blob)
 
 import { BlobThumbStore, THUMB_ROUTE, blobAccess, isThumbPath } from '@/server/storage/thumbs'
@@ -10,6 +10,7 @@ const data = new Uint8Array([1, 2, 3]).buffer
 beforeEach(() => {
   blob.put.mockReset()
   blob.get.mockReset()
+  blob.del.mockReset()
 })
 
 describe('Miniaturas en un almacén privado de Vercel Blob', () => {
@@ -40,6 +41,24 @@ describe('Miniaturas en un almacén privado de Vercel Blob', () => {
   it('si la miniatura no existe devuelve null', async () => {
     blob.get.mockResolvedValue(null)
     expect(await new BlobThumbStore({ access: 'private' }).read('thumbs/no-existe.webp')).toBeNull()
+  })
+})
+
+describe('Borrar miniaturas', () => {
+  it('convierte la ruta del sitio en la ruta del almacén', async () => {
+    await new BlobThumbStore({ access: 'private', token: 'tok' }).remove(`${THUMB_ROUTE}/thumbs/abc.webp`)
+    expect(blob.del).toHaveBeenCalledWith('thumbs/abc.webp', expect.objectContaining({ token: 'tok' }))
+  })
+
+  it('en un almacén público borra por la URL del CDN', async () => {
+    await new BlobThumbStore({ access: 'public' }).remove('https://abc.public.blob.vercel-storage.com/thumbs/x.webp')
+    expect(blob.del).toHaveBeenCalledWith('https://abc.public.blob.vercel-storage.com/thumbs/x.webp', expect.anything())
+  })
+
+  it('ignora lo que no es una miniatura guardada', async () => {
+    await new BlobThumbStore({ access: 'private' }).remove('/assets/placeholder-foto.webp')
+    await new BlobThumbStore({ access: 'private' }).remove('data:image/webp;base64,AAA')
+    expect(blob.del).not.toHaveBeenCalled()
   })
 })
 

@@ -17,7 +17,10 @@ export function StorageBar({ usedBytes, limitBytes }: { usedBytes: number; limit
         data-alerta={alert ? 'true' : 'false'}
         className="h-2 overflow-hidden rounded-full bg-fucsia/12"
       >
-        <div className={`h-full rounded-full ${alert ? 'bg-naranja' : 'bg-gradient-to-r from-fucsia to-naranja'}`} style={{ width: `${Math.min(100, percent)}%` }} />
+        <div
+          className={`h-full rounded-full ${alert ? 'bg-naranja' : 'bg-gradient-to-r from-fucsia to-naranja'}`}
+          style={{ width: `${Math.min(100, percent)}%` }}
+        />
       </div>
     </div>
   )

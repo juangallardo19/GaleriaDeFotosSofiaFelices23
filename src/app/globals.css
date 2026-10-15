@@ -27,9 +27,21 @@ html {
 }
 
 body {
-  background-color: var(--color-crema);
-  background-image: url('/assets/papel.jpg');
-  background-size: 512px;
+  background-color: transparent;
+}
+
+/* El papel queda fijo detrás de todo; las barras pegajosas usan el mismo papel fijo y no se nota el corte */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-crema) url('/assets/papel.jpg') 0 0 / 512px;
+  pointer-events: none;
+}
+
+.papel {
+  background: var(--color-crema) url('/assets/papel.jpg') 0 0 / 512px fixed;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -116,4 +128,90 @@ body {
 }
 .sin-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Aparecer al llegar a cada sección (una sola vez) */
+.revelar {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0) scale(0.98);
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.8s cubic-bezier(0.2, 0.75, 0.25, 1);
+  transition-delay: var(--retraso, 0ms);
+}
+.revelar[data-variante='zoom'] {
+  transform: scale(0.86);
+}
+.revelar[data-variante='izq'] {
+  transform: translate3d(-28px, 0, 0);
+}
+.revelar[data-variante='der'] {
+  transform: translate3d(28px, 0, 0);
+}
+.revelar[data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Entrada de cada capa de la portada */
+@keyframes entrar-caer {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -60px, 0);
+  }
+}
+@keyframes entrar-subir {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 90px, 0);
+  }
+}
+@keyframes entrar-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-25deg);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.12) rotate(4deg);
+  }
+}
+@keyframes entrar-suave {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+.entrada {
+  animation: var(--animacion, entrar-suave) 0.95s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+  animation-delay: var(--retraso, 0ms);
+}
+
+/* El corazón late al dar like */
+@keyframes latido {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.45);
+  }
+  60% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.latido {
+  animation: latido 0.45s ease-out;
+}
+
+@keyframes balanceo {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  50% {
+    rotate: -4deg;
+  }
 }

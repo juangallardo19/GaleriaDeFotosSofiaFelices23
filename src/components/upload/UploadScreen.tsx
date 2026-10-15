@@ -13,6 +13,7 @@ import { SITE_TITLE } from '@/lib/event'
 import { useUploadQueue } from '@/hooks/useUploadQueue'
 import { buttonClass } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
+import { Reveal } from '@/components/ui/Reveal'
 import { UploadList } from './UploadList'
 import { UploadPicker } from './UploadPicker'
 
@@ -49,28 +50,34 @@ export function UploadScreen() {
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-5 px-4 pb-16">
       <UploadPicker onSelect={select} />
-      {skipped > 0 && <p className="text-center text-xs opacity-70">{skipped === 1 ? 'Un archivo ya estaba en la lista.' : `${skipped} archivos ya estaban en la lista.`}</p>}
+      {skipped > 0 && (
+        <p className="text-center text-xs opacity-70">{skipped === 1 ? 'Un archivo ya estaba en la lista.' : `${skipped} archivos ya estaban en la lista.`}</p>
+      )}
       {snapshot.tasks.length === 0 && (
-        <ul className="flex flex-col gap-2.5 rounded-panel border border-linea bg-white/70 p-5 text-sm">
-          <li className="flex gap-2.5">
-            <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
-            Puedes elegir hasta 30 fotos y videos a la vez, de hasta 1 GB cada uno.
-          </li>
-          <li className="flex gap-2.5">
-            <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
-            Se suben en su calidad original. Si se cae el internet, sigue desde donde iba.
-          </li>
-          <li className="flex gap-2.5">
-            <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
-            Deja esta página abierta mientras sube; te avisamos cuando termine.
-          </li>
-        </ul>
+        <Reveal delay={240}>
+          <ul className="flex flex-col gap-2.5 rounded-panel border border-linea bg-white/70 p-5 text-sm">
+            <li className="flex gap-2.5">
+              <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
+              Puedes elegir hasta 30 fotos y videos a la vez, de hasta 1 GB cada uno.
+            </li>
+            <li className="flex gap-2.5">
+              <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
+              Se suben en su calidad original. Si se cae el internet, sigue desde donde iba.
+            </li>
+            <li className="flex gap-2.5">
+              <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
+              Deja esta página abierta mientras sube; te avisamos cuando termine.
+            </li>
+          </ul>
+        </Reveal>
       )}
       <UploadList snapshot={snapshot} onRetry={(id) => queue.retry(id)} onCancel={(id) => queue.cancel(id)} />
       {finished && (
-        <div className="aparecer flex flex-col items-center gap-3 rounded-panel bg-rosa/80 p-6 text-center">
+        <div className="entrada flex flex-col items-center gap-3 rounded-panel bg-rosa/80 p-6 text-center [--animacion:entrar-pop]">
           <p className="font-script text-5xl text-fucsia">¡Gracias!</p>
-          <p className="text-sm">{snapshot.done === 1 ? 'Tu recuerdo ya está en el álbum de Sofi.' : `Tus ${snapshot.done} recuerdos ya están en el álbum de Sofi.`}</p>
+          <p className="text-sm">
+            {snapshot.done === 1 ? 'Tu recuerdo ya está en el álbum de Sofi.' : `Tus ${snapshot.done} recuerdos ya están en el álbum de Sofi.`}
+          </p>
           <Link href="/" className={buttonClass('primary', 'mt-1')}>
             Ver el álbum
           </Link>

@@ -10,6 +10,7 @@ export interface ThumbFile {
 export interface ThumbStore {
   put(input: { data: ArrayBuffer; contentType: string; variant: ThumbVariant }): Promise<string>
   read?(path: string): Promise<ThumbFile | null>
+  remove?(url: string): Promise<void>
 }
 
 export const THUMB_ROUTE = '/api/miniaturas'
@@ -46,6 +47,13 @@ export class BlobThumbStore implements ThumbStore {
       token: this.token,
     })
     return this.access === 'private' ? `${THUMB_ROUTE}/${blob.pathname}` : blob.url
+  }
+
+  async remove(url: string) {
+    const target = url.startsWith(`${THUMB_ROUTE}/`) ? url.slice(THUMB_ROUTE.length + 1) : url.startsWith('https://') ? url : null
+    if (!target) return
+    const { del } = await import('@vercel/blob')
+    await del(target, { token: this.token })
   }
 
   async read(path: string): Promise<ThumbFile | null> {

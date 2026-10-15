@@ -7,6 +7,7 @@ import type { Author, Comment, CommentView, Media, MediaView, Viewer } from '../
 import { AppError } from '../errors'
 import type { Mailer } from '../mail/types'
 import type { CommentRepository, GuestRepository, LikeRepository, MediaRepository, SettingsRepository } from '../repositories/types'
+import type { ThumbStore } from '../storage/thumbs'
 import type { StorageProvider } from '../storage/types'
 
 export interface RegisterInput {
@@ -28,6 +29,7 @@ export interface MediaServiceDeps {
   settings: SettingsRepository
   guests: GuestRepository
   storage: StorageProvider
+  thumbs?: ThumbStore
   mailer: Mailer
   alertEmail: string
   now?: () => Date
@@ -209,6 +211,9 @@ export function createMediaService(deps: MediaServiceDeps) {
       await deps.storage.remove(m.driveFileId)
       await Promise.all([deps.likes.removeForMedia(mediaId), deps.comments.removeForMedia(mediaId)])
       await deps.media.remove(mediaId)
+      // Liberar el espacio de las miniaturas no debe impedir el borrado
+      const urls = [m.thumbUrl, m.previewUrl].filter((u): u is string => !!u && !u.startsWith('/assets/'))
+      await Promise.all(urls.map((u) => deps.thumbs?.remove?.(u).catch((err) => console.error('No se pudo borrar la miniatura', err))))
     },
 
     stats: () => deps.media.stats(),

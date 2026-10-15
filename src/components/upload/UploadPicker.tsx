@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent } from 'react'
 import { MAX_FILES_PER_BATCH, validateBatch, type RejectReason } from '@/features/media/media-kind'
 import { Icon } from '@/components/ui/Icon'
+import { Reveal } from '@/components/ui/Reveal'
 
 const REASONS: Record<RejectReason, string> = {
   'tipo-no-soportado': 'este tipo de archivo no se puede subir.',
@@ -24,23 +25,42 @@ export function UploadPicker({ onSelect, disabled = false }: { onSelect: (files:
     if (accepted.length > 0) onSelect(accepted.map((a) => a.file))
   }
 
-  const tile = 'cosido relative flex min-h-[132px] cursor-pointer flex-col items-center justify-center gap-2 rounded-panel p-5 text-center transition-transform active:scale-[0.98]'
+  const tile =
+    'cosido group relative flex h-full min-h-[132px] cursor-pointer flex-col items-center justify-center gap-2 rounded-panel p-5 text-center transition-transform duration-300 hover:-translate-y-1 hover:rotate-[-1deg] active:scale-[0.97]'
 
   return (
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
-        <label className={`${tile} sombra-sticker bg-fucsia text-white ${disabled ? 'pointer-events-none opacity-60' : ''}`}>
-          <Icon name="image" size={30} />
-          <span className="text-sm font-semibold">Elegir de la galería</span>
-          <span className="text-[11px] opacity-85">Fotos y videos, varios a la vez</span>
-          <input type="file" aria-label="Elegir de la galería" multiple accept="image/*,video/*" onChange={handle} disabled={disabled} className="sr-only" />
-        </label>
-        <label className={`${tile} border-[1.5px] border-fucsia bg-crema text-fucsia [--costura:rgb(212_175_55/0.8)] ${disabled ? 'pointer-events-none opacity-60' : ''}`}>
-          <Icon name="camera" size={30} strokeWidth={1.8} />
-          <span className="text-sm font-semibold">Tomar foto o video</span>
-          <span className="text-[11px] opacity-85">Con la cámara del celular</span>
-          <input type="file" aria-label="Tomar foto o video" accept="image/*,video/*" capture="environment" onChange={handle} disabled={disabled} className="sr-only" />
-        </label>
+        <Reveal variant="izq">
+          <label className={`${tile} sombra-sticker bg-fucsia text-white ${disabled ? 'pointer-events-none opacity-60' : ''}`}>
+            <span className="transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-125">
+              <Icon name="image" size={30} />
+            </span>
+            <span className="text-sm font-semibold">Elegir de la galería</span>
+            <span className="text-[11px] opacity-85">Fotos y videos, varios a la vez</span>
+            <input type="file" aria-label="Elegir de la galería" multiple accept="image/*,video/*" onChange={handle} disabled={disabled} className="sr-only" />
+          </label>
+        </Reveal>
+        <Reveal variant="der" delay={120}>
+          <label
+            className={`${tile} border-[1.5px] border-fucsia bg-crema text-fucsia [--costura:rgb(212_175_55/0.8)] ${disabled ? 'pointer-events-none opacity-60' : ''}`}
+          >
+            <span className="transition-transform duration-300 group-hover:rotate-6 group-hover:scale-125">
+              <Icon name="camera" size={30} strokeWidth={1.8} />
+            </span>
+            <span className="text-sm font-semibold">Tomar foto o video</span>
+            <span className="text-[11px] opacity-85">Con la cámara del celular</span>
+            <input
+              type="file"
+              aria-label="Tomar foto o video"
+              accept="image/*,video/*"
+              capture="environment"
+              onChange={handle}
+              disabled={disabled}
+              className="sr-only"
+            />
+          </label>
+        </Reveal>
       </div>
       {messages.length > 0 && (
         <div role="alert" className="rounded-2xl border border-naranja/40 bg-[#FFF0D4] p-3 text-sm">

@@ -15,6 +15,7 @@ import { useMe } from '@/hooks/useMe'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { CommentsPanel } from '@/components/comments/CommentsPanel'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Reveal } from '@/components/ui/Reveal'
 import { Icon } from '@/components/ui/Icon'
 import { MasonryGrid } from './MasonryGrid'
 import { MediaCard, type TapePosition } from './MediaCard'
@@ -79,6 +80,8 @@ export function GalleryApp({ mode, empty }: Props) {
   const [notice, setNotice] = useState<string | null>(null)
   const [reloads, setReloads] = useState(0)
   const topRef = useRef<HTMLDivElement>(null)
+  const stuckProbe = useRef<HTMLDivElement>(null)
+  const [stuck, setStuck] = useState(false)
   const sentinel = useRef<HTMLDivElement>(null)
   const request = useRef(0)
   const itemsRef = useRef(items)
@@ -242,6 +245,15 @@ export function GalleryApp({ mode, empty }: Props) {
     }
   }
 
+  // La barra de filtros solo lleva sombra cuando queda pegada arriba
+  useEffect(() => {
+    const el = stuckProbe.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting && entry.boundingClientRect.top < 80), { rootMargin: '-67px 0px 0px 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   useEffect(() => {
     if (!notice) return
     const t = setTimeout(() => setNotice(null), 4000)
@@ -264,7 +276,7 @@ export function GalleryApp({ mode, empty }: Props) {
         type="button"
         aria-pressed={active}
         onClick={() => changeView(sort, { ...extra, kind })}
-        className={`flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip border px-3.5 text-[12.5px] ${active ? 'border-fucsia bg-rosa font-semibold text-fucsia' : 'border-vino/20 bg-white/60 font-medium'}`}
+        className={`flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip border px-3.5 text-[12.5px] transition-[transform,background-color,border-color] duration-200 hover:-translate-y-0.5 active:scale-95 ${active ? 'border-fucsia bg-rosa font-semibold text-fucsia' : 'border-vino/20 bg-white/60 font-medium hover:border-fucsia/50 hover:bg-rosa/40'}`}
       >
         {kind && <Icon name={kind === 'photo' ? 'image' : 'play'} size={14} filled={kind === 'video'} />}
         {label}
@@ -275,7 +287,10 @@ export function GalleryApp({ mode, empty }: Props) {
   return (
     <section id="galeria" aria-label="Recuerdos" className="relative scroll-mt-20">
       <div ref={topRef} className="scroll-mt-24" />
-      <div className="sticky top-[66px] z-30 -mx-4 mb-4 border-b border-transparent bg-crema/85 px-4 py-2.5 backdrop-blur-md md:-mx-8 md:px-8">
+      <div ref={stuckProbe} aria-hidden="true" className="h-px" />
+      <Reveal
+        className={`papel sticky top-[66px] z-30 -mx-4 mb-4 px-4 py-2.5 transition-shadow duration-300 md:-mx-8 md:px-8 ${stuck ? 'shadow-[0_8px_18px_-10px_rgb(90_18_56/0.35)]' : ''}`}
+      >
         <div className="mx-auto flex max-w-[1440px] items-center gap-2">
           <div className="sin-scrollbar flex min-w-0 flex-1 gap-2 overflow-x-auto">
             {kindChip(undefined, 'Todo')}
@@ -286,7 +301,7 @@ export function GalleryApp({ mode, empty }: Props) {
             type="button"
             aria-label={`Ordenar y filtrar: ${SORT_LABELS[sort]}`}
             onClick={() => setSheet(true)}
-            className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip border border-vino/20 bg-white/70 px-3 text-[12.5px] font-semibold"
+            className="flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip border border-vino/20 bg-white/70 px-3 text-[12.5px] font-semibold transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-fucsia/50 active:scale-95"
           >
             <Icon name="sort" size={16} strokeWidth={2} className="text-naranja" />
             <span className="hidden sm:inline">{SORT_LABELS[sort]}</span>
@@ -299,7 +314,7 @@ export function GalleryApp({ mode, empty }: Props) {
             {liveEnabled && <NewItemsPill count={liveState.pending} onShow={showNew} />}
           </div>
         )}
-      </div>
+      </Reveal>
 
       {error && items.length === 0 ? (
         <div className="py-10 text-center">
@@ -344,9 +359,11 @@ export function GalleryApp({ mode, empty }: Props) {
         <Link
           href="/subir"
           aria-label="Subir recuerdos"
-          className="cosido sombra-sticker fixed bottom-5 right-5 z-30 flex size-[60px] items-center justify-center rounded-[22px] bg-fucsia text-white md:bottom-8 md:right-8"
+          className="cosido sombra-sticker entrada group fixed bottom-5 right-5 z-30 flex size-[60px] items-center justify-center rounded-[22px] bg-fucsia text-white transition-[transform,background-color] duration-300 [--animacion:entrar-pop] [--retraso:600ms] hover:scale-110 hover:bg-rosa-vivo active:scale-95 md:bottom-8 md:right-8"
         >
-          <Icon name="plus" size={26} />
+          <span className="transition-transform duration-300 group-hover:rotate-90">
+            <Icon name="plus" size={26} />
+          </span>
         </Link>
       )}
 

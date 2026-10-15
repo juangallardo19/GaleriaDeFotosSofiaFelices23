@@ -19,7 +19,7 @@ interface Props {
 export function GuestQr({ guest }: { guest: CreatedGuest }) {
   const [copied, setCopied] = useState(false)
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[24px] bg-rosa/80 p-5">
+    <div className="entrada flex flex-col items-center gap-3 rounded-[24px] bg-rosa/80 p-5 [--animacion:entrar-pop]">
       <div className="rounded-[20px] bg-white p-3">
         <img src={guest.qr} alt={`QR de ${guest.name}`} width={220} height={220} className="size-[220px]" />
       </div>
@@ -80,7 +80,12 @@ export function NewGuestDialog({ open, create, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[#3A0B24]/45" onClick={onClose} aria-hidden="true" />
-      <div role="dialog" aria-modal="true" aria-label="Nuevo invitado" className="aparecer relative flex w-full max-w-3xl flex-col gap-6 rounded-panel bg-crema bg-[url('/assets/papel.jpg')] bg-[length:512px] p-6 shadow-2xl md:flex-row md:p-9">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Nuevo invitado"
+        className="aparecer relative flex w-full max-w-3xl flex-col gap-6 rounded-panel bg-crema bg-[url('/assets/papel.jpg')] bg-[length:512px] p-6 shadow-2xl md:flex-row md:p-9"
+      >
         <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute right-3 top-3 flex size-11 items-center justify-center rounded-[15px]">
           <Icon name="close" size={20} strokeWidth={2} />
         </button>

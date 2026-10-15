@@ -57,7 +57,7 @@ export function buildContainer(opts: BuildOptions & { repos: Repos }): AppContai
     storage,
     thumbs,
     guests: createGuestService({ guests: repos.guests, baseUrl: config.baseUrl, now }),
-    media: createMediaService({ ...repos, storage, mailer, alertEmail: config.alertEmail, now }),
+    media: createMediaService({ ...repos, storage, thumbs, mailer, alertEmail: config.alertEmail, now }),
     adminLimiter: new SlidingWindowLimiter({ limit: 5, windowMs: 60_000 }),
   }
 }

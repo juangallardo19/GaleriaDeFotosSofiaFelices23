@@ -40,14 +40,22 @@ interface Props {
 
 export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B8CF', readOnly = false }: Props) {
   const [loaded, setLoaded] = useState(false)
+  const [beat, setBeat] = useState(0)
   const word = media.kind === 'video' ? 'Video' : 'Foto'
   const name = media.author.name
   const frameHeight = Math.round(Math.min(media.height, media.width * 1.6)) || 5
   const frameWidth = media.width || 4
 
   return (
-    <article className="sombra-card relative rounded-card border border-oro/35 bg-[#FFFDFB]/95 p-[7px] pb-2.5">
-      {tape && <span data-testid="washi-tape" aria-hidden="true" className={`absolute z-10 h-[18px] rounded-[1px] opacity-80 shadow-sm ${TAPE_STYLE[tape]}`} style={{ backgroundColor: tapeColor }} />}
+    <article className="sombra-card group relative rounded-card border border-oro/35 bg-[#FFFDFB]/95 p-[7px] pb-2.5 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:rotate-[-0.6deg] hover:shadow-[0_18px_34px_rgb(90_18_56/0.16)]">
+      {tape && (
+        <span
+          data-testid="washi-tape"
+          aria-hidden="true"
+          className={`absolute z-10 h-[18px] rounded-[1px] opacity-80 shadow-sm transition-transform duration-300 group-hover:scale-110 ${TAPE_STYLE[tape]}`}
+          style={{ backgroundColor: tapeColor }}
+        />
+      )}
       <button type="button" aria-label={`Abrir ${word.toLowerCase()} de ${name}`} onClick={() => onOpen(media.id)} className="block w-full cursor-zoom-in">
         <div
           data-testid="media-frame"
@@ -60,11 +68,11 @@ export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B
             loading="lazy"
             decoding="async"
             onLoad={() => setLoaded(true)}
-            className={`h-full w-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`h-full w-full object-cover transition-[opacity,transform] duration-500 ease-out group-hover:scale-[1.05] ${loaded ? 'opacity-100' : 'opacity-0'}`}
           />
           {media.kind === 'video' && (
             <>
-              <span aria-hidden="true" className="absolute left-1/2 top-1/2 flex size-[42px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl bg-crema/90 text-naranja shadow-[0_3px_0_rgb(90_18_56/0.2)]">
+              <span aria-hidden="true" className="absolute left-1/2 top-1/2 flex size-[42px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl bg-crema/90 text-naranja shadow-[0_3px_0_rgb(90_18_56/0.2)] transition-transform duration-300 group-hover:scale-115">
                 <Icon name="play" size={20} filled />
               </span>
               {media.durationSec !== null && (
@@ -87,10 +95,15 @@ export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B
               type="button"
               aria-label="Me gusta"
               aria-pressed={media.likedByViewer}
-              onClick={() => onToggleLike(media.id)}
-              className="-m-2 flex min-h-11 min-w-11 items-center justify-center p-2 transition-transform active:scale-90"
+              onClick={() => {
+                setBeat((b) => b + 1)
+                onToggleLike(media.id)
+              }}
+              className="-m-2 flex min-h-11 min-w-11 items-center justify-center p-2 transition-transform hover:scale-125 active:scale-90"
             >
-              <Icon name="heart" size={16} filled={media.likedByViewer} />
+              <span key={beat} className={beat ? 'latido' : ''}>
+                <Icon name="heart" size={16} filled={media.likedByViewer} />
+              </span>
             </button>
           )}
           <span aria-label={`${media.likesCount} me gusta`}>{media.likesCount}</span>

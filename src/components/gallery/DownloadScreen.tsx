@@ -6,6 +6,7 @@ import { mediaQuery } from '@/features/gallery/gallery-state'
 import type { PublicMedia } from '@/server/serialize'
 import { api } from '@/lib/api'
 import { useMe } from '@/hooks/useMe'
+import { Reveal } from '@/components/ui/Reveal'
 import { DownloadSheet, type DownloadStats } from './DownloadSheet'
 
 interface Summary extends DownloadStats {
@@ -63,7 +64,7 @@ export function DownloadScreen() {
   if (!summary || !me) return <div className="shimmer mx-auto h-80 w-full max-w-md rounded-panel" aria-hidden="true" />
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-panel border border-linea bg-white/70 p-6">
+    <Reveal className="mx-auto w-full max-w-md rounded-panel border border-linea bg-white/70 p-6">
       <DownloadSheet
         open
         asPage
@@ -80,6 +81,6 @@ export function DownloadScreen() {
           {error}
         </p>
       )}
-    </div>
+    </Reveal>
   )
 }

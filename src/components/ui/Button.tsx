@@ -8,7 +8,7 @@ export function cn(...classes: (string | false | null | undefined)[]) {
 }
 
 const BASE =
-  'cosido relative inline-flex min-h-11 items-center justify-center gap-2 rounded-boton px-5 py-3 text-sm font-semibold transition-[transform,background-color] active:translate-y-px disabled:cursor-not-allowed disabled:opacity-55'
+  'cosido relative inline-flex min-h-11 items-center justify-center gap-2 rounded-boton px-5 py-3 text-sm font-semibold transition-[transform,background-color,box-shadow] duration-200 hover:-translate-y-0.5 hover:scale-[1.03] active:translate-y-px active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-55'
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'sombra-sticker bg-fucsia text-white hover:bg-rosa-vivo',

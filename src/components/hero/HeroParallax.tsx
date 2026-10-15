@@ -10,12 +10,15 @@ interface Placement {
   rot?: number
 }
 
+type Entrance = 'entrar-caer' | 'entrar-subir' | 'entrar-pop' | 'entrar-suave'
+
 interface LayerArt {
   src: string
   ratio: number
   alt: string
   mobile: Placement | null
   desktop: Placement
+  entrance: [Entrance, number]
   priority?: boolean
   float?: boolean
 }
@@ -25,17 +28,98 @@ const M = { w: 390, h: 770 }
 const D = { w: 1440, h: 960 }
 
 const ART: Record<string, LayerArt> = {
-  banderines: { src: '/assets/banderines.webp', ratio: 0.2489, alt: '', mobile: { x: -34, y: 34, w: 458 }, desktop: { x: 95, y: 40, w: 1250 } },
-  'globo-rosa': { src: '/assets/globo-rosa.webp', ratio: 2.5281, alt: '', mobile: { x: 12, y: 262, w: 78, rot: 9 }, desktop: { x: 236, y: 300, w: 128, rot: 10 }, float: true },
-  'globo-naranja': { src: '/assets/globo-naranja.webp', ratio: 1.7476, alt: '', mobile: { x: 296, y: 236, w: 98, rot: -7 }, desktop: { x: 1068, y: 272, w: 176, rot: -8 }, float: true },
-  'globo-rojo': { src: '/assets/globo-rojo.webp', ratio: 2.4684, alt: '', mobile: null, desktop: { x: 128, y: 440, w: 90, rot: -6 }, float: true },
-  'happy-birthday': { src: '/assets/happy-birthday.webp', ratio: 0.46, alt: 'Happy Birthday en letras recortadas', mobile: { x: 66, y: 124, w: 260, rot: -3 }, desktop: { x: 482, y: 146, w: 476, rot: -2 } },
-  corazon: { src: '/assets/corazon.webp', ratio: 0.945, alt: '', mobile: { x: 26, y: 140, w: 48, rot: 14 }, desktop: { x: 408, y: 158, w: 74, rot: 14 } },
-  estrella: { src: '/assets/estrella.webp', ratio: 0.9717, alt: '', mobile: { x: 322, y: 110, w: 46, rot: 12 }, desktop: { x: 950, y: 136, w: 64, rot: 12 } },
-  'globo-2': { src: '/assets/globo-2.webp', ratio: 1.4975, alt: 'Globos dorados con el número 2', mobile: { x: 18, y: 452, w: 102, rot: -8 }, desktop: { x: 404, y: 520, w: 166, rot: -9 } },
-  'globo-3': { src: '/assets/globo-3.webp', ratio: 1.5437, alt: 'Globos dorados con el número 3', mobile: { x: 272, y: 448, w: 100, rot: 7 }, desktop: { x: 872, y: 516, w: 162, rot: 8 } },
-  sofi: { src: '/assets/sofi.webp', ratio: 1.372, alt: 'Sofi vestida de angelito con su gorrito de cumpleaños', mobile: { x: 72, y: 284, w: 246 }, desktop: { x: 572, y: 350, w: 296 }, priority: true },
-  pastel: { src: '/assets/pastel.webp', ratio: 0.9311, alt: '', mobile: { x: 82, y: 546, w: 226 }, desktop: { x: 562, y: 652, w: 316 } },
+  banderines: {
+    entrance: ['entrar-caer', 0],
+    src: '/assets/banderines.webp',
+    ratio: 0.2489,
+    alt: '',
+    mobile: { x: -34, y: 34, w: 458 },
+    desktop: { x: 95, y: 40, w: 1250 },
+  },
+  'globo-rosa': {
+    entrance: ['entrar-subir', 380],
+    src: '/assets/globo-rosa.webp',
+    ratio: 2.5281,
+    alt: '',
+    mobile: { x: 12, y: 262, w: 78, rot: 9 },
+    desktop: { x: 236, y: 300, w: 128, rot: 10 },
+    float: true,
+  },
+  'globo-naranja': {
+    entrance: ['entrar-subir', 460],
+    src: '/assets/globo-naranja.webp',
+    ratio: 1.7476,
+    alt: '',
+    mobile: { x: 296, y: 236, w: 98, rot: -7 },
+    desktop: { x: 1068, y: 272, w: 176, rot: -8 },
+    float: true,
+  },
+  'globo-rojo': {
+    entrance: ['entrar-subir', 540],
+    src: '/assets/globo-rojo.webp',
+    ratio: 2.4684,
+    alt: '',
+    mobile: null,
+    desktop: { x: 128, y: 440, w: 90, rot: -6 },
+    float: true,
+  },
+  'happy-birthday': {
+    entrance: ['entrar-pop', 200],
+    src: '/assets/happy-birthday.webp',
+    ratio: 0.46,
+    alt: 'Happy Birthday en letras recortadas',
+    mobile: { x: 66, y: 124, w: 260, rot: -3 },
+    desktop: { x: 482, y: 146, w: 476, rot: -2 },
+  },
+  corazon: {
+    entrance: ['entrar-pop', 720],
+    src: '/assets/corazon.webp',
+    ratio: 0.945,
+    alt: '',
+    mobile: { x: 26, y: 140, w: 48, rot: 14 },
+    desktop: { x: 408, y: 158, w: 74, rot: 14 },
+  },
+  estrella: {
+    entrance: ['entrar-pop', 800],
+    src: '/assets/estrella.webp',
+    ratio: 0.9717,
+    alt: '',
+    mobile: { x: 322, y: 110, w: 46, rot: 12 },
+    desktop: { x: 950, y: 136, w: 64, rot: 12 },
+  },
+  'globo-2': {
+    entrance: ['entrar-subir', 620],
+    src: '/assets/globo-2.webp',
+    ratio: 1.4975,
+    alt: 'Globos dorados con el número 2',
+    mobile: { x: 18, y: 452, w: 102, rot: -8 },
+    desktop: { x: 404, y: 520, w: 166, rot: -9 },
+  },
+  'globo-3': {
+    entrance: ['entrar-subir', 700],
+    src: '/assets/globo-3.webp',
+    ratio: 1.5437,
+    alt: 'Globos dorados con el número 3',
+    mobile: { x: 272, y: 448, w: 100, rot: 7 },
+    desktop: { x: 872, y: 516, w: 162, rot: 8 },
+  },
+  sofi: {
+    entrance: ['entrar-suave', 300],
+    src: '/assets/sofi.webp',
+    ratio: 1.372,
+    alt: 'Sofi vestida de angelito con su gorrito de cumpleaños',
+    mobile: { x: 72, y: 284, w: 246 },
+    desktop: { x: 572, y: 350, w: 296 },
+    priority: true,
+  },
+  pastel: {
+    entrance: ['entrar-subir', 860],
+    src: '/assets/pastel.webp',
+    ratio: 0.9311,
+    alt: '',
+    mobile: { x: 82, y: 546, w: 226 },
+    desktop: { x: 562, y: 652, w: 316 },
+  },
 }
 
 const pct = (value: number, total: number) => `${((value / total) * 100).toFixed(3)}%`
@@ -64,6 +148,7 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
       return
     }
     let frame = 0
+    const pointer = { x: 0, y: 0 }
     const update = () => {
       frame = 0
       const y = window.scrollY
@@ -71,16 +156,41 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
       if (y > limit) return
       for (const layer of HERO_LAYERS) {
         const el = layers.current.get(layer.id)
-        if (el) el.style.transform = `translate3d(${(y * (layer.drift ?? 0)).toFixed(1)}px, ${layerOffset(y, layer.speed)}px, 0)`
+        if (!el) continue
+        // Profundidad: lo que está más al frente se mueve más con el mouse
+        const depth = layer.speed - 0.15
+        const x = y * (layer.drift ?? 0) + pointer.x * depth * 16
+        const dy = layerOffset(y, layer.speed) + pointer.y * depth * 10
+        el.style.transform = `translate3d(${x.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`
       }
     }
-    const onScroll = () => {
+    const schedule = () => {
       if (!frame) frame = requestAnimationFrame(update)
     }
+    const onPointer = (e: PointerEvent) => {
+      const r = root.current?.getBoundingClientRect()
+      if (!r) return
+      pointer.x = ((e.clientX - r.left) / r.width - 0.5) * 2
+      pointer.y = ((e.clientY - r.top) / r.height - 0.5) * 2
+      schedule()
+    }
+    const onLeave = () => {
+      pointer.x = 0
+      pointer.y = 0
+      schedule()
+    }
+    const finePointer = window.matchMedia?.('(pointer: fine)').matches
+    const el = root.current
     update()
-    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('scroll', schedule, { passive: true })
+    if (finePointer && el) {
+      el.addEventListener('pointermove', onPointer)
+      el.addEventListener('pointerleave', onLeave)
+    }
     return () => {
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('scroll', schedule)
+      el?.removeEventListener('pointermove', onPointer)
+      el?.removeEventListener('pointerleave', onLeave)
       cancelAnimationFrame(frame)
     }
   }, [reducedMotion])
@@ -106,27 +216,29 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
                 else layers.current.delete(layer.id)
               }}
             >
-              <img
-                src={art.src}
-                alt={art.alt}
-                width={1000}
-                height={Math.round(1000 * art.ratio)}
-                decoding="async"
-                fetchPriority={art.priority ? 'high' : 'auto'}
-                className={`h-auto w-full select-none rotate-[var(--rm)] md:rotate-[var(--rd)] ${art.float && !reducedMotion ? 'flotar' : ''}`}
-                style={{ '--rm': `${rotM}deg`, '--rd': `${rotD}deg` } as CSSProperties}
-                draggable={false}
-              />
+              <div className="entrada" style={{ '--animacion': art.entrance[0], '--retraso': `${art.entrance[1]}ms` } as CSSProperties}>
+                <img
+                  src={art.src}
+                  alt={art.alt}
+                  width={1000}
+                  height={Math.round(1000 * art.ratio)}
+                  decoding="async"
+                  fetchPriority={art.priority ? 'high' : 'auto'}
+                  className={`h-auto w-full select-none rotate-[var(--rm)] md:rotate-[var(--rd)] ${art.float && !reducedMotion ? 'flotar' : ''}`}
+                  style={{ '--rm': `${rotM}deg`, '--rd': `${rotD}deg` } as CSSProperties}
+                  draggable={false}
+                />
+              </div>
             </div>
           )
         })}
       </div>
       <a
         href="#galeria"
-        className="absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-chip border border-fucsia/25 bg-crema/85 px-3.5 py-1.5 text-xs font-semibold text-fucsia"
+        className="entrada absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-chip border border-fucsia/25 bg-crema/85 px-3.5 py-1.5 text-xs font-semibold text-fucsia transition-colors [--retraso:1200ms] hover:bg-rosa"
       >
         Desliza
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-naranja">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="animate-bounce text-naranja">
           <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </a>

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 // Datos sembrados cuando el servidor corre con E2E_SEED=1 (ver src/server/container.ts)
 const TOKEN = 'E2ETIAMARTA00000000000'
@@ -38,18 +38,22 @@ test.describe('Invitado', () => {
 })
 
 test.describe('Admin en /admin', () => {
-  test('pide contraseña y rechaza una incorrecta', async ({ page }) => {
+  // En desarrollo la página puede tardar en hidratarse: se reintenta hasta que el formulario responda
+  async function login(page: Page, password: string, until: () => Promise<void>) {
     await page.goto('/admin')
-    await page.getByLabel('Contraseña').fill('incorrecta')
-    await page.getByRole('button', { name: 'Entrar' }).click()
-    await expect(page.getByRole('alert')).toHaveText('Contraseña incorrecta')
+    await expect(async () => {
+      await page.getByLabel('Contraseña').fill(password)
+      await page.getByRole('button', { name: 'Entrar' }).click()
+      await until()
+    }).toPass({ timeout: 30_000 })
+  }
+
+  test('pide contraseña y rechaza una incorrecta', async ({ page }) => {
+    await login(page, 'incorrecta', () => expect(page.getByRole('alert').filter({ hasText: 'Contraseña incorrecta' })).toBeVisible({ timeout: 3000 }))
   })
 
   test('con la contraseña correcta crea un invitado y ve su QR', async ({ page }) => {
-    await page.goto('/admin')
-    await page.getByLabel('Contraseña').fill(ADMIN_PASSWORD)
-    await page.getByRole('button', { name: 'Entrar' }).click()
-    await expect(page.getByRole('heading', { name: 'Invitados' })).toBeVisible()
+    await login(page, ADMIN_PASSWORD, () => expect(page.getByRole('heading', { name: 'Invitados' })).toBeVisible({ timeout: 5000 }))
     await page.getByRole('button', { name: 'Nuevo invitado' }).click()
     await page.getByLabel('Nombre del invitado').fill('Prima Valentina')
     await page.getByRole('button', { name: 'Guardar invitado' }).click()

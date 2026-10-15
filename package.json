@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:real": "playwright test -c playwright.real.config.ts",
     "test:api": "npx --yes newman run tests/api/album-sofi.postman_collection.json -e tests/api/local.postman_environment.json",
     "test:carga": "k6 run tests/load/pico-qr.js",
     "db:setup": "node scripts/db-setup.mjs",

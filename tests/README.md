@@ -6,6 +6,8 @@ Se escribieron **antes del código** (TDD): primero en rojo y luego se implement
 |---|---|
 | `npm test` | Unitarias + integración + componentes (Vitest) |
 | `npm run test:e2e` | Flujos completos en navegador (Playwright, celular y escritorio) |
+| `npm run test:real` | Servicios reales: Neon, Drive, Blob y los archivos de `../MediaTest` (sube, verifica y borra) |
+| `npm run test:e2e:real` | De punta a punta con servicios reales: un invitado sube los archivos de `../MediaTest` desde el celular y al final se borra todo |
 | `npm run test:api` | Contrato de la API (colección de Postman con Newman) |
 | `npm run test:carga` | Pico de 40 personas escaneando el QR en 10 s (k6) |
 

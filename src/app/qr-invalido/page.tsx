@@ -5,7 +5,7 @@ export const metadata = { title: 'Código no válido · Álbum de Sofi' }
 export default function QrInvalidoPage() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-      <p className="font-script text-5xl text-fucsia">Sofi</p>
+      <p className="entrada font-script text-5xl text-fucsia [--animacion:entrar-pop]">Sofi</p>
       <h1 className="font-serif text-3xl leading-tight">Uy, este código no funciona</h1>
       <p className="text-base leading-relaxed opacity-80">Puede que la tarjeta esté dañada o que el código no sea de esta fiesta. Vuelve a escanear el QR de tu tarjeta.</p>
       <p className="text-sm leading-relaxed opacity-65">¿Perdiste tu tarjeta? Busca a los anfitriones en la mesa principal.</p>

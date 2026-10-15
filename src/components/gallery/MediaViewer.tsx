@@ -93,6 +93,7 @@ export function MediaViewer({ media, position, onClose, onPrev, onNext, onToggle
     }
   }, [])
 
+  const [beat, setBeat] = useState(0)
   const name = media.author.name
 
   return (
@@ -123,7 +124,7 @@ export function MediaViewer({ media, position, onClose, onPrev, onNext, onToggle
                 key={media.id}
                 src={media.previewUrl ?? media.thumbUrl}
                 alt={`Foto de ${name}`}
-                className="max-h-[72dvh] w-auto max-w-full rounded-2xl object-contain"
+                className="aparecer max-h-[72dvh] w-auto max-w-full rounded-2xl object-contain"
                 style={{ backgroundColor: media.dominantColor }}
               />
             )}
@@ -156,10 +157,15 @@ export function MediaViewer({ media, position, onClose, onPrev, onNext, onToggle
                 type="button"
                 aria-label={`Me gusta · ${media.likesCount}`}
                 aria-pressed={media.likedByViewer}
-                onClick={() => onToggleLike(media.id)}
-                className={`inline-flex min-h-11 items-center gap-2 rounded-boton px-4 text-sm font-semibold transition-transform active:scale-95 ${media.likedByViewer ? 'bg-fucsia text-white' : 'bg-white/10'}`}
+                onClick={() => {
+                  setBeat((b) => b + 1)
+                  onToggleLike(media.id)
+                }}
+                className={`inline-flex min-h-11 items-center gap-2 rounded-boton px-4 text-sm font-semibold transition-[transform,background-color] hover:scale-105 active:scale-95 ${media.likedByViewer ? 'bg-fucsia text-white' : 'bg-white/10 hover:bg-white/20'}`}
               >
-                <Icon name="heart" size={18} filled={media.likedByViewer} />
+                <span key={beat} className={beat ? 'latido' : ''}>
+                  <Icon name="heart" size={18} filled={media.likedByViewer} />
+                </span>
                 {media.likesCount}
               </button>
             )}

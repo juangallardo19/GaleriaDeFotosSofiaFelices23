@@ -44,7 +44,7 @@ export function SideMenu({ open, current, onClose, readOnly = false, guestName }
         </div>
         {guestName && <p className="mt-3 text-sm opacity-75">Hola, {guestName}</p>}
         <nav aria-label="Menú principal" className="mt-6 flex flex-col gap-1.5">
-          {navFor(readOnly).map((item) => {
+          {navFor(readOnly).map((item, i) => {
             const active = item.href === current
             return (
               <Link
@@ -52,7 +52,8 @@ export function SideMenu({ open, current, onClose, readOnly = false, guestName }
                 href={item.href}
                 onClick={onClose}
                 aria-current={active ? 'page' : undefined}
-                className={`relative flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-[15px] ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(212_175_55/0.7)]' : 'font-medium'}`}
+                style={{ animationDelay: `${80 + i * 60}ms` }}
+                className={`aparecer relative flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-[15px] transition-transform duration-200 hover:translate-x-1 ${active ? 'cosido border border-fucsia/50 bg-crema font-semibold text-fucsia [--costura:rgb(212_175_55/0.7)]' : 'font-medium'}`}
               >
                 <Icon name={item.icon} size={20} strokeWidth={2} />
                 {item.label}

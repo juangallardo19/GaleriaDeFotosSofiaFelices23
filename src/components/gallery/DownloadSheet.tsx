@@ -63,7 +63,7 @@ export function DownloadSheet({ open, folderUrl, photosUrl, stats, onClose, onDo
         {options.map((o) => (
           <label
             key={o.id}
-            className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 ${choice === o.id ? 'border-fucsia bg-rosa/70' : 'border-linea bg-white/70'}`}
+            className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition-[transform,background-color,border-color] duration-200 hover:-translate-y-0.5 hover:border-fucsia/50 ${choice === o.id ? 'border-fucsia bg-rosa/70' : 'border-linea bg-white/70'}`}
           >
             <input type="radio" name="descarga" checked={choice === o.id} onChange={() => setChoice(o.id)} className="size-4 accent-fucsia" />
             <span className="flex flex-col">

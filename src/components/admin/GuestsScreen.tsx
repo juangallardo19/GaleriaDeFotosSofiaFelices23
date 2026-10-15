@@ -20,9 +20,9 @@ interface Stats {
 
 function StatCard({ icon, value, label, children }: { icon: IconName; value: string; label: string; children?: ReactNode }) {
   return (
-    <div className="flex flex-col gap-2 rounded-card border border-linea bg-white/72 p-4 md:p-5">
+    <div className="group flex flex-col gap-2 rounded-card border border-linea bg-white/72 p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgb(90_18_56/0.12)] md:p-5">
       <div className="flex items-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-[14px] bg-rosa text-fucsia">
+        <span className="flex size-10 items-center justify-center rounded-[14px] bg-rosa text-fucsia transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110">
           <Icon name={icon} size={20} strokeWidth={2} />
         </span>
         <span className="text-[26px] font-semibold leading-none md:text-[30px]">{value}</span>
@@ -37,7 +37,12 @@ function Modal({ label, onClose, children }: { label: string; onClose: () => voi
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-[#3A0B24]/45" onClick={onClose} aria-hidden="true" />
-      <div role="dialog" aria-modal="true" aria-label={label} className="aparecer relative w-full max-w-md rounded-panel bg-crema bg-[url('/assets/papel.jpg')] bg-[length:512px] p-6 shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        className="aparecer relative w-full max-w-md rounded-panel bg-crema bg-[url('/assets/papel.jpg')] bg-[length:512px] p-6 shadow-2xl"
+      >
         <button type="button" aria-label="Cerrar" onClick={onClose} className="absolute right-3 top-3 flex size-11 items-center justify-center rounded-[15px]">
           <Icon name="close" size={20} strokeWidth={2} />
         </button>
@@ -57,8 +62,14 @@ function ImportDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
     setSaving(true)
     setError(null)
     try {
-      const r = await api<{ created: number; skipped: string[] }>('/api/admin/guests/import', { method: 'POST', headers: { 'content-type': 'text/csv' }, body: text })
-      setResult(`${r.created === 1 ? 'Se creó 1 invitado' : `Se crearon ${r.created} invitados`}${r.skipped.length ? `. Ya existían: ${r.skipped.join(', ')}` : ''}.`)
+      const r = await api<{ created: number; skipped: string[] }>('/api/admin/guests/import', {
+        method: 'POST',
+        headers: { 'content-type': 'text/csv' },
+        body: text,
+      })
+      setResult(
+        `${r.created === 1 ? 'Se creó 1 invitado' : `Se crearon ${r.created} invitados`}${r.skipped.length ? `. Ya existían: ${r.skipped.join(', ')}` : ''}.`,
+      )
       setText('')
       onDone()
     } catch (err) {
@@ -71,7 +82,9 @@ function ImportDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
   return (
     <Modal label="Importar lista de invitados" onClose={onClose}>
       <h2 className="font-serif text-2xl">Importar lista</h2>
-      <p className="mt-2 text-sm leading-relaxed opacity-75">Copia la columna de nombres desde Excel y pégala aquí, un nombre por línea. También sirve un archivo .csv.</p>
+      <p className="mt-2 text-sm leading-relaxed opacity-75">
+        Copia la columna de nombres desde Excel y pégala aquí, un nombre por línea. También sirve un archivo .csv.
+      </p>
       <textarea
         aria-label="Nombres de los invitados"
         value={text}
@@ -83,7 +96,12 @@ function ImportDialog({ onClose, onDone }: { onClose: () => void; onDone: () => 
       <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-fucsia">
         <Icon name="folder" size={18} strokeWidth={2} />
         Elegir archivo .csv
-        <input type="file" accept=".csv,.txt,text/csv,text/plain" className="sr-only" onChange={async (e) => setText(await (e.target.files?.[0]?.text() ?? Promise.resolve('')))} />
+        <input
+          type="file"
+          accept=".csv,.txt,text/csv,text/plain"
+          className="sr-only"
+          onChange={async (e) => setText(await (e.target.files?.[0]?.text() ?? Promise.resolve('')))}
+        />
       </label>
       {result && <p className="mt-3 rounded-xl bg-[#e3f5ea] p-3 text-sm text-[#23784a]">{result}</p>}
       {error && (
@@ -182,7 +200,9 @@ export function GuestsScreen() {
           {stats?.storage && <StorageBar usedBytes={stats.storage.usedBytes} limitBytes={stats.storage.limitBytes} />}
         </StatCard>
       </div>
-      <div className="mt-7">{rows ? <GuestTable rows={rows} onShowQr={showQr} onDelete={remove} /> : <div className="shimmer h-64 rounded-card" aria-hidden="true" />}</div>
+      <div className="mt-7">
+        {rows ? <GuestTable rows={rows} onShowQr={showQr} onDelete={remove} /> : <div className="shimmer h-64 rounded-card" aria-hidden="true" />}
+      </div>
 
       <NewGuestDialog open={creating} create={create} onClose={() => setCreating(false)} />
       {importing && <ImportDialog onClose={() => setImporting(false)} onDone={refresh} />}

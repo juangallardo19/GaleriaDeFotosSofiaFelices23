@@ -27,7 +27,9 @@ export function CardsScreen() {
   const sample = guests?.[0]?.name ?? 'Tía Marta'
 
   const option = (value: boolean, title: string, text: string) => (
-    <label className={`flex min-h-16 flex-1 cursor-pointer items-start gap-3 rounded-2xl border p-4 ${duplex === value ? 'border-fucsia bg-rosa/70' : 'border-linea bg-white/70'}`}>
+    <label
+      className={`flex min-h-16 flex-1 cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-fucsia/50 ${duplex === value ? 'border-fucsia bg-rosa/70' : 'border-linea bg-white/70'}`}
+    >
       <input type="radio" name="caras" checked={duplex === value} onChange={() => setDuplex(value)} className="mt-1 size-4 accent-fucsia" />
       <span>
         <span className="block text-sm font-semibold">{title}</span>
@@ -41,7 +43,11 @@ export function CardsScreen() {
       title="Tarjetas QR"
       subtitle="Tarjeta con el nombre y el QR personal · 10 × 14 cm, 4 por hoja A4"
       actions={
-        <a href={`/api/admin/cards${duplex ? '?duplex=1' : ''}`} className={buttonClass('primary', count === 0 ? 'pointer-events-none opacity-55' : '')} aria-disabled={count === 0}>
+        <a
+          href={`/api/admin/cards${duplex ? '?duplex=1' : ''}`}
+          className={buttonClass('primary', count === 0 ? 'pointer-events-none opacity-55' : '')}
+          aria-disabled={count === 0}
+        >
           <Icon name="download" size={18} strokeWidth={2} />
           {count ? `Descargar PDF (${sheets} ${sheets === 1 ? 'hoja' : 'hojas'})` : 'Descargar PDF'}
         </a>
@@ -53,7 +59,13 @@ export function CardsScreen() {
             {option(false, 'Tarjeta con QR (una cara)', 'El nombre, la fecha y el QR en el mismo lado.')}
             {option(true, 'Con frente decorado (doble cara)', 'Agrega un frente con «Captura tus recuerdos». Imprime a doble cara.')}
           </div>
-          <p className="text-sm opacity-75">{guests === null ? 'Cargando invitados…' : count === 0 ? 'Primero crea o importa los invitados.' : `Se generan ${count} tarjetas, una por invitado, en orden alfabético.`}</p>
+          <p className="text-sm opacity-75">
+            {guests === null
+              ? 'Cargando invitados…'
+              : count === 0
+                ? 'Primero crea o importa los invitados.'
+                : `Se generan ${count} tarjetas, una por invitado, en orden alfabético.`}
+          </p>
           <ul className="flex flex-col gap-2 rounded-card border border-linea bg-white/70 p-5 text-sm">
             <li className="flex gap-2.5">
               <Icon name="printer" size={18} strokeWidth={2} className="mt-0.5 shrink-0 text-fucsia" />
@@ -70,12 +82,14 @@ export function CardsScreen() {
           </ul>
         </div>
         <div aria-hidden="true" className="mx-auto w-[260px]">
-          <div className="relative flex aspect-[10/14] flex-col items-center overflow-hidden rounded-xl border border-oro/50 bg-crema px-5 pt-4 text-center shadow-[0_14px_30px_rgb(90_18_56/0.15)]">
+          <div className="relative flex aspect-[10/14] flex-col items-center overflow-hidden rounded-xl border border-oro/50 bg-crema px-5 pt-4 text-center shadow-[0_14px_30px_rgb(90_18_56/0.15)] transition-transform duration-500 hover:-rotate-2 hover:scale-[1.04]">
             <img src="/assets/banderines.webp" alt="" className="w-[92%]" />
             <p className="mt-2 text-[9px] font-semibold tracking-[0.18em]">CAPTURA TUS</p>
             <p className="-mt-1 font-script text-[30px] leading-tight text-fucsia">Recuerdos</p>
             <p className="text-[12px] font-semibold">{sample}</p>
-            <p className="mt-1 text-[8px] leading-snug opacity-80">Gracias por estar en este día tan especial. Baila, come rico, toma muchas fotos y no te vayas sin abrazar a Sofi.</p>
+            <p className="mt-1 text-[8px] leading-snug opacity-80">
+              Gracias por estar en este día tan especial. Baila, come rico, toma muchas fotos y no te vayas sin abrazar a Sofi.
+            </p>
             <div className="mt-2 flex w-full items-center gap-2 text-left">
               <div className="grid size-[76px] shrink-0 grid-cols-5 grid-rows-5 gap-px rounded border border-oro/60 bg-white p-1.5">
                 {Array.from({ length: 25 }, (_, i) => (

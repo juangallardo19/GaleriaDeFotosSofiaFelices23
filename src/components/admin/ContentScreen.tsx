@@ -22,7 +22,9 @@ export function ContentScreen() {
 
   const load = useCallback(
     (from: string | null) => {
-      api<{ items: PublicMedia[]; nextCursor: string | null }>(mediaQuery({ sort: 'recientes', filter: { kind, includeHidden: true }, cursor: from, limit: 48 })).then(
+      api<{ items: PublicMedia[]; nextCursor: string | null }>(
+        mediaQuery({ sort: 'recientes', filter: { kind, includeHidden: true }, cursor: from, limit: 48 }),
+      ).then(
         (page) => {
           setItems((prev) => (from ? [...prev, ...page.items] : page.items))
           setCursor(page.nextCursor)
@@ -101,9 +103,17 @@ export function ContentScreen() {
       {error && <p className="mt-4 text-sm text-fucsia">{error}</p>}
       <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {visible.map((m) => (
-          <li key={m.id}>
-            <div className="relative aspect-square overflow-hidden rounded-[18px]" style={{ backgroundColor: m.dominantColor }}>
-              <img src={m.thumbUrl} alt={`${m.kind === 'video' ? 'Video' : 'Foto'} de ${m.author.name}`} loading="lazy" className="h-full w-full object-cover" />
+          <li key={m.id} className="aparecer group">
+            <div
+              className="relative aspect-square overflow-hidden rounded-[18px] transition-[transform,box-shadow] duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_rgb(90_18_56/0.15)]"
+              style={{ backgroundColor: m.dominantColor }}
+            >
+              <img
+                src={m.thumbUrl}
+                alt={`${m.kind === 'video' ? 'Video' : 'Foto'} de ${m.author.name}`}
+                loading="lazy"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
               {m.hidden && <div className="absolute inset-0 bg-crema/65" />}
               <div className="absolute left-2 top-2 flex gap-1.5">
                 {m.hidden && (
@@ -128,7 +138,12 @@ export function ContentScreen() {
                 >
                   <Icon name={m.hidden ? 'eye' : 'eyeOff'} size={16} strokeWidth={2} />
                 </button>
-                <button type="button" aria-label={`Borrar recuerdo de ${m.author.name}`} onClick={() => void remove(m.id)} className="flex size-9 items-center justify-center rounded-xl bg-crema/92">
+                <button
+                  type="button"
+                  aria-label={`Borrar recuerdo de ${m.author.name}`}
+                  onClick={() => void remove(m.id)}
+                  className="flex size-9 items-center justify-center rounded-xl bg-crema/92"
+                >
                   <Icon name="trash" size={16} strokeWidth={2} />
                 </button>
               </div>

@@ -8,13 +8,14 @@ import {
   MemorySettingsRepository,
 } from '@/server/repositories/memory'
 import { VISITOR, type Viewer } from '@/server/domain'
-import { FakeMailer, FakeStorage, clock, sequentialIds } from '../helpers/fakes'
+import { FakeMailer, FakeStorage, FakeThumbStore, clock, sequentialIds } from '../helpers/fakes'
 
 async function setup() {
   const c = clock()
   const guests = new MemoryGuestRepository()
   const storage = new FakeStorage()
   const mailer = new FakeMailer()
+  const thumbs = new FakeThumbStore()
   const service = createMediaService({
     media: new MemoryMediaRepository(),
     likes: new MemoryLikeRepository(),
@@ -23,6 +24,7 @@ async function setup() {
     guests,
     storage,
     mailer,
+    thumbs,
     alertEmail: 'sofiacumpleanosgaleriadefotos@gmail.com',
     now: c.now,
     newId: sequentialIds('m'),
@@ -31,7 +33,7 @@ async function setup() {
   const camilo = await guests.create({ name: 'Camilo', token: 'C'.repeat(22) })
   const asViewer = (id: string): Viewer => ({ id, role: 'guest' })
   const admin: Viewer = { id: 'admin', role: 'admin' }
-  return { c, service, storage, mailer, marta: asViewer(marta.id), camilo: asViewer(camilo.id), admin }
+  return { c, service, storage, mailer, thumbs, marta: asViewer(marta.id), camilo: asViewer(camilo.id), admin }
 }
 
 const photo = (p: Partial<RegisterInput> = {}): RegisterInput => ({
@@ -187,6 +189,31 @@ describe('Alerta de almacenamiento por correo', () => {
       throw new Error('Drive caído')
     }
     await expect(service.register(marta, photo())).resolves.toBeTruthy()
+  })
+})
+
+describe('Borrar libera el espacio', () => {
+  it('al borrar un recuerdo también se borran su miniatura y su vista previa', async () => {
+    const { service, storage, thumbs, marta } = await setup()
+    const m = await service.register(marta, photo({ driveFileId: 'orig', thumbUrl: '/api/miniaturas/thumbs/a.webp', previewUrl: '/api/miniaturas/previews/a.webp' }))
+    await service.remove(marta, m.id)
+    expect(storage.removed).toEqual(['orig'])
+    expect(thumbs.removed).toEqual(['/api/miniaturas/thumbs/a.webp', '/api/miniaturas/previews/a.webp'])
+  })
+
+  it('no intenta borrar los dibujos de reemplazo del sitio', async () => {
+    const { service, thumbs, marta } = await setup()
+    const m = await service.register(marta, photo({ thumbUrl: '/assets/placeholder-video.webp', previewUrl: null }))
+    await service.remove(marta, m.id)
+    expect(thumbs.removed).toEqual([])
+  })
+
+  it('si falla borrar la miniatura igual se borra el recuerdo', async () => {
+    const { service, thumbs, marta } = await setup()
+    thumbs.failRemove = true
+    const m = await service.register(marta, photo({ thumbUrl: '/api/miniaturas/thumbs/b.webp' }))
+    await service.remove(marta, m.id)
+    expect((await service.list(marta, { sort: 'recientes' })).items).toEqual([])
   })
 })
 
