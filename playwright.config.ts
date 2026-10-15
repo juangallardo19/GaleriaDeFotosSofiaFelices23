@@ -19,6 +19,7 @@ export default defineConfig({
         env: {
           E2E_SEED: '1',
           ADMIN_PASSWORD: 'clave-admin-e2e',
+          ADMIN_LOGIN_LIMIT: '500',
           SESSION_SECRET: 'secreto-e2e-0123456789-abcdefghijklmnop',
           NEXT_PUBLIC_SITE_URL: `http://localhost:${PORT}`,
         },

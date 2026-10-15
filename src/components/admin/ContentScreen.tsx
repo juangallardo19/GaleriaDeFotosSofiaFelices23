@@ -4,7 +4,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { mediaQuery, patchItem, removeItem } from '@/features/gallery/gallery-state'
 import type { PublicMedia } from '@/server/serialize'
 import { api, postJson } from '@/lib/api'
+import { inBatches } from '@/lib/batch'
 import { formatDuration } from '@/lib/format'
+import { SelectionBar } from '@/components/gallery/SelectionBar'
 import { buttonClass } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { AdminShell } from './AdminShell'
@@ -19,6 +21,10 @@ export function ContentScreen() {
   const [onlyHidden, setOnlyHidden] = useState(false)
   const [folder, setFolder] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [busy, setBusy] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const load = useCallback(
     (from: string | null) => {
@@ -67,6 +73,58 @@ export function ContentScreen() {
     setItems((prev) => removeItem(prev, id))
   }
 
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function stopSelecting() {
+    setSelecting(false)
+    setSelected(new Set())
+  }
+
+  // Acciones sobre todo lo elegido; la selección grande se manda por partes
+  async function runOnSelected(label: string, send: (group: string[]) => Promise<number>, apply: (ids: Set<string>) => void, done: (n: number) => string) {
+    const ids = [...selected]
+    setBusy(`${label}…`)
+    try {
+      const n = await inBatches(ids, send, (d, t) => setBusy(`${label} ${d} de ${t}…`))
+      apply(new Set(ids))
+      setNotice(done(n))
+      stopSelecting()
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'No se pudo completar')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const hideSelected = (hidden: boolean) =>
+    runOnSelected(
+      hidden ? 'Ocultando' : 'Mostrando',
+      async (group) => (await postJson<{ updated: number }>('/api/admin/media', { ids: group, hidden }, 'PATCH')).updated,
+      (ids) => setItems((prev) => prev.map((m) => (ids.has(m.id) ? { ...m, hidden } : m))),
+      (n) => `${n === 1 ? '1 recuerdo' : `${n} recuerdos`} ${hidden ? 'ocultos' : 'visibles de nuevo'}`,
+    )
+
+  const deleteSelected = () =>
+    runOnSelected(
+      'Borrando',
+      async (group) => (await postJson<{ removed: number }>('/api/media/borrar', { ids: group })).removed,
+      (ids) => setItems((prev) => prev.filter((m) => !ids.has(m.id))),
+      (n) => (n === 1 ? 'Se borró 1 recuerdo' : `Se borraron ${n} recuerdos`),
+    )
+
+  useEffect(() => {
+    if (!notice) return
+    const t = setTimeout(() => setNotice(null), 4000)
+    return () => clearTimeout(t)
+  }, [notice])
+
   const visible = onlyHidden ? items.filter((m) => m.hidden) : items
   const hiddenCount = items.filter((m) => m.hidden).length
 
@@ -99,15 +157,36 @@ export function ContentScreen() {
         {chip('Fotos', kind === 'photo', () => pickKind('photo'))}
         {chip('Videos', kind === 'video', () => pickKind('video'))}
         {chip(`Ocultos (${hiddenCount})`, onlyHidden, () => setOnlyHidden((v) => !v))}
+        {items.length > 0 && chip('Seleccionar', selecting, () => (selecting ? stopSelecting() : setSelecting(true)))}
       </div>
       {error && <p className="mt-4 text-sm text-fucsia">{error}</p>}
       <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {visible.map((m) => (
           <li key={m.id} className="aparecer group">
             <div
-              className="relative aspect-square overflow-hidden rounded-[18px] transition-[transform,box-shadow] duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_rgb(90_18_56/0.15)]"
+              className={`relative aspect-square overflow-hidden rounded-[18px] transition-[transform,box-shadow] duration-300 ${
+                selected.has(m.id) ? 'scale-[0.95] outline-2 outline-offset-2 outline-fucsia' : 'group-hover:-translate-y-1 group-hover:shadow-[0_14px_28px_rgb(90_18_56/0.15)]'
+              }`}
               style={{ backgroundColor: m.dominantColor }}
             >
+              {selecting && (
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={selected.has(m.id)}
+                  aria-label={`Seleccionar ${m.kind === 'video' ? 'video' : 'foto'} de ${m.author.name}`}
+                  onClick={() => toggleSelected(m.id)}
+                  className="absolute inset-0 z-20 cursor-pointer"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`absolute right-2 top-2 flex size-7 items-center justify-center rounded-full border-2 shadow-sm ${selected.has(m.id) ? 'border-white bg-fucsia text-white' : 'border-white bg-black/20'}`}
+                  >
+                    {selected.has(m.id) && <Icon name="check" size={16} strokeWidth={3} />}
+                  </span>
+                  {selected.has(m.id) && <span className="absolute inset-0 bg-fucsia/15" />}
+                </button>
+              )}
               <img
                 src={m.thumbUrl}
                 alt={`${m.kind === 'video' ? 'Video' : 'Foto'} de ${m.author.name}`}
@@ -129,7 +208,7 @@ export function ContentScreen() {
                   </span>
                 )}
               </div>
-              <div className="absolute bottom-2 right-2 flex gap-1.5">
+              <div className={`absolute bottom-2 right-2 flex gap-1.5 ${selecting ? 'hidden' : ''}`}>
                 <button
                   type="button"
                   aria-label={m.hidden ? `Mostrar recuerdo de ${m.author.name}` : `Ocultar recuerdo de ${m.author.name}`}
@@ -154,6 +233,25 @@ export function ContentScreen() {
       </ul>
       {!loading && visible.length === 0 && <p className="py-10 text-center text-sm opacity-65">No hay recuerdos aquí todavía.</p>}
       {loading && <div className="shimmer mt-6 h-40 rounded-card" aria-hidden="true" />}
+      {selecting && <div aria-hidden="true" className="h-40" />}
+      {selecting && (
+        <SelectionBar
+          count={selected.size}
+          total={visible.length}
+          busy={busy}
+          onSelectAll={() => setSelected(new Set(visible.map((m) => m.id)))}
+          onClear={() => setSelected(new Set())}
+          onCancel={stopSelecting}
+          onHide={() => void hideSelected(true)}
+          onShow={() => void hideSelected(false)}
+          onDelete={() => void deleteSelected()}
+        />
+      )}
+      {notice && (
+        <p role="status" className="aparecer fixed inset-x-4 bottom-28 z-50 mx-auto max-w-sm rounded-2xl bg-vino px-4 py-3 text-center text-sm text-crema shadow-xl">
+          {notice}
+        </p>
+      )}
       {cursor && !loading && (
         <div className="mt-6 flex justify-center">
           <button type="button" onClick={() => (setLoading(true), load(cursor))} className={buttonClass('secondary')}>

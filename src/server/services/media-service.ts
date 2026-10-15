@@ -22,6 +22,9 @@ export interface RegisterInput {
   sizeBytes: number
 }
 
+export const MAX_BATCH = 100
+const BATCH_CONCURRENCY = 4
+
 export interface MediaServiceDeps {
   media: MediaRepository
   likes: LikeRepository
@@ -59,6 +62,21 @@ export function createMediaService(deps: MediaServiceDeps) {
   async function toViews(viewer: Viewer, items: Media[]): Promise<MediaView[]> {
     const [authors, liked] = await Promise.all([authorsFor(items.map((m) => m.guestId)), deps.likes.likedIds(viewer.id)])
     return items.map((m) => ({ ...m, author: authors.get(m.guestId) ?? { id: m.guestId, name: UNKNOWN_AUTHOR }, likedByViewer: liked.has(m.id) }))
+  }
+
+  async function findBatch(ids: string[]) {
+    const unique = [...new Set(ids)]
+    if (unique.length === 0 || unique.length > MAX_BATCH) throw new AppError('invalido', `Elige entre 1 y ${MAX_BATCH} recuerdos`)
+    return Promise.all(unique.map(mustFind))
+  }
+
+  async function destroy(m: Media) {
+    await deps.storage.remove(m.driveFileId)
+    await Promise.all([deps.likes.removeForMedia(m.id), deps.comments.removeForMedia(m.id)])
+    await deps.media.remove(m.id)
+    // Liberar el espacio de las miniaturas no debe impedir el borrado
+    const urls = [m.thumbUrl, m.previewUrl].filter((u): u is string => !!u && !u.startsWith('/assets/'))
+    await Promise.all(urls.map((u) => deps.thumbs?.remove?.(u).catch((err) => console.error('No se pudo borrar la miniatura', err))))
   }
 
   async function mustFind(mediaId: string) {
@@ -204,16 +222,27 @@ export function createMediaService(deps: MediaServiceDeps) {
       await deps.media.setHidden(mediaId, hidden)
     },
 
+    async setHiddenMany(viewer: Viewer, ids: string[], hidden: boolean) {
+      if (viewer.role !== 'admin') throw new AppError('prohibido')
+      const items = await findBatch(ids)
+      await Promise.all(items.map((m) => deps.media.setHidden(m.id, hidden)))
+      return { updated: items.length }
+    },
+
     async remove(viewer: Viewer, mediaId: string) {
       mustParticipate(viewer)
       const m = await mustFind(mediaId)
       if (viewer.role !== 'admin' && viewer.id !== m.guestId) throw new AppError('prohibido', 'Solo puedes borrar tus propios recuerdos')
-      await deps.storage.remove(m.driveFileId)
-      await Promise.all([deps.likes.removeForMedia(mediaId), deps.comments.removeForMedia(mediaId)])
-      await deps.media.remove(mediaId)
-      // Liberar el espacio de las miniaturas no debe impedir el borrado
-      const urls = [m.thumbUrl, m.previewUrl].filter((u): u is string => !!u && !u.startsWith('/assets/'))
-      await Promise.all(urls.map((u) => deps.thumbs?.remove?.(u).catch((err) => console.error('No se pudo borrar la miniatura', err))))
+      await destroy(m)
+    },
+
+    // Todo o nada en los permisos: si hay uno ajeno o inexistente no se toca ninguno
+    async removeMany(viewer: Viewer, ids: string[]) {
+      mustParticipate(viewer)
+      const items = await findBatch(ids)
+      if (viewer.role !== 'admin' && items.some((m) => m.guestId !== viewer.id)) throw new AppError('prohibido', 'Solo puedes borrar tus propios recuerdos')
+      for (let i = 0; i < items.length; i += BATCH_CONCURRENCY) await Promise.all(items.slice(i, i + BATCH_CONCURRENCY).map(destroy))
+      return { removed: items.length }
     },
 
     stats: () => deps.media.stats(),

@@ -36,9 +36,12 @@ interface Props {
   tape?: TapePosition
   tapeColor?: string
   readOnly?: boolean
+  selecting?: boolean
+  selected?: boolean
+  onSelect?: (id: string) => void
 }
 
-export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B8CF', readOnly = false }: Props) {
+export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B8CF', readOnly = false, selecting = false, selected = false, onSelect }: Props) {
   const [loaded, setLoaded] = useState(false)
   const [beat, setBeat] = useState(0)
   const word = media.kind === 'video' ? 'Video' : 'Foto'
@@ -47,7 +50,12 @@ export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B
   const frameWidth = media.width || 4
 
   return (
-    <article className="tarjeta group relative p-[7px] pb-2.5 transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:rotate-[-0.6deg] hover:shadow-[0_18px_34px_rgb(90_18_56/0.16)]">
+    <article
+      data-selected={selected ? 'true' : undefined}
+      className={`tarjeta group relative p-[7px] pb-2.5 transition-[transform,box-shadow,outline-color] duration-300 ease-out ${
+        selected ? 'scale-[0.97] outline-2 outline-offset-2 outline-fucsia' : 'hover:-translate-y-1.5 hover:rotate-[-0.6deg] hover:shadow-[0_18px_34px_rgb(90_18_56/0.16)]'
+      }`}
+    >
       {tape && (
         <span
           data-testid="washi-tape"
@@ -56,7 +64,13 @@ export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B
           style={{ backgroundColor: tapeColor }}
         />
       )}
-      <button type="button" aria-label={`Abrir ${word.toLowerCase()} de ${name}`} onClick={() => onOpen(media.id)} className="block w-full cursor-zoom-in">
+      <button
+        type="button"
+        {...(selecting
+          ? { role: 'checkbox', 'aria-checked': selected, 'aria-label': `Seleccionar ${word.toLowerCase()} de ${name}`, onClick: () => onSelect?.(media.id) }
+          : { 'aria-label': `Abrir ${word.toLowerCase()} de ${name}`, onClick: () => onOpen(media.id) })}
+        className={`block w-full ${selecting ? 'cursor-pointer' : 'cursor-zoom-in'}`}
+      >
         <div
           data-testid="media-frame"
           className="relative overflow-hidden rounded-2xl"
@@ -70,6 +84,15 @@ export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B
             onLoad={() => setLoaded(true)}
             className={`h-full w-full object-cover transition-[opacity,transform] duration-500 ease-out group-hover:scale-[1.05] ${loaded ? 'opacity-100' : 'opacity-0'}`}
           />
+          {selecting && (
+            <span
+              aria-hidden="true"
+              className={`absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-full border-2 shadow-sm transition-colors ${selected ? 'border-white bg-fucsia text-white' : 'border-white bg-black/20'}`}
+            >
+              {selected && <Icon name="check" size={16} strokeWidth={3} />}
+            </span>
+          )}
+          {selected && <span aria-hidden="true" className="absolute inset-0 bg-fucsia/15" />}
           {media.kind === 'video' && (
             <>
               <span aria-hidden="true" className="absolute left-1/2 top-1/2 flex size-[42px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl bg-crema/90 text-naranja shadow-[0_3px_0_rgb(90_18_56/0.2)] transition-transform duration-300 group-hover:scale-115">
@@ -88,8 +111,8 @@ export function MediaCard({ media, onOpen, onToggleLike, tape, tapeColor = '#F7B
       </div>
       <div className="mt-1.5 flex items-center gap-3 px-1 text-[11.5px] font-semibold">
         <span className={`flex items-center gap-1 ${media.likedByViewer ? 'text-fucsia' : ''}`}>
-          {readOnly ? (
-            <Icon name="heart" size={16} />
+          {readOnly || selecting ? (
+            <Icon name="heart" size={16} filled={media.likedByViewer} />
           ) : (
             <button
               type="button"

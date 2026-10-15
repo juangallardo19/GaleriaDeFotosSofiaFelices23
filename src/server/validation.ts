@@ -32,4 +32,6 @@ export const CommentBody = z.object({
 
 export const EditCommentBody = z.object({ text: z.string().max(4000) })
 export const HiddenBody = z.object({ hidden: z.boolean() })
+export const IdsBody = z.object({ ids: z.array(z.string().min(1).max(100)).min(1).max(100) })
+export const HiddenManyBody = IdsBody.extend({ hidden: z.boolean() })
 export const GuestBody = z.object({ name: z.string().min(1).max(200) })

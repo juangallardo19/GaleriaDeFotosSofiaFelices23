@@ -19,6 +19,13 @@ describe('Variables de entorno pegadas a mano en Vercel', () => {
     expect(envValue('X', { X: '"abc' })).toBe('"abc')
   })
 
+  it('el límite de intentos de login del admin es 5 por minuto salvo que se configure (pruebas locales)', () => {
+    const base = { SESSION_SECRET: 'secreto-de-pruebas-0123456789-abcdefghij' }
+    expect(configFromEnv(base).adminLoginLimit).toBe(5)
+    expect(configFromEnv({ ...base, ADMIN_LOGIN_LIMIT: '200' }).adminLoginLimit).toBe(200)
+    expect(configFromEnv({ ...base, ADMIN_LOGIN_LIMIT: 'muchos' }).adminLoginLimit).toBe(5)
+  })
+
   it('la configuración usa los valores limpios', () => {
     const config = configFromEnv({ SESSION_SECRET: '"secreto-de-pruebas-0123456789-abcdefghij"', ADMIN_PASSWORD: ' clave ', NEXT_PUBLIC_SITE_URL: '"https://sofi23.vercel.app"' })
     expect(config.sessionSecret).toBe('secreto-de-pruebas-0123456789-abcdefghij')

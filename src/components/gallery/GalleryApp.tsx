@@ -9,7 +9,8 @@ import type { GalleryFilter } from '@/features/gallery/types'
 import { createToggleLike } from '@/features/likes/like-command'
 import { HEARTBEAT_MS } from '@/features/presence/presence'
 import type { PublicMedia } from '@/server/serialize'
-import { api } from '@/lib/api'
+import { api, postJson } from '@/lib/api'
+import { inBatches } from '@/lib/batch'
 import { NEEDS_QR } from '@/lib/messages'
 import { useMe } from '@/hooks/useMe'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -23,6 +24,7 @@ import { MediaViewer } from './MediaViewer'
 import { NewItemsPill } from './NewItemsPill'
 import { PresenceBadge } from './PresenceBadge'
 import { SkeletonCard } from './SkeletonCard'
+import { SelectionBar } from './SelectionBar'
 import { SORT_LABELS, SortSheet } from './SortSheet'
 
 export type GalleryMode = 'todo' | 'mios' | 'likes'
@@ -30,6 +32,7 @@ export type GalleryMode = 'todo' | 'mios' | 'likes'
 interface Props {
   mode: GalleryMode
   empty: { title: string; text: string; action?: { label: string; href: string } }
+  selectable?: boolean
 }
 
 interface Page {
@@ -64,7 +67,7 @@ const toLive = (media: PublicMedia): LiveItem => ({ id: media.id, createdAt: new
 
 const baseFilter = (mode: GalleryMode): GalleryFilter => (mode === 'mios' ? { mine: true } : mode === 'likes' ? { liked: true } : {})
 
-export function GalleryApp({ mode, empty }: Props) {
+export function GalleryApp({ mode, empty, selectable = false }: Props) {
   const me = useMe()
   const reducedMotion = usePrefersReducedMotion()
   const readOnly = me?.role === 'visitor'
@@ -78,6 +81,9 @@ export function GalleryApp({ mode, empty }: Props) {
   const [open, setOpen] = useState<number | null>(null)
   const [online, setOnline] = useState(0)
   const [notice, setNotice] = useState<string | null>(null)
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [busy, setBusy] = useState<string | null>(null)
   const [reloads, setReloads] = useState(0)
   const topRef = useRef<HTMLDivElement>(null)
   const stuckProbe = useRef<HTMLDivElement>(null)
@@ -235,6 +241,39 @@ export function GalleryApp({ mode, empty }: Props) {
     }
   }, [readOnly, mode])
 
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function stopSelecting() {
+    setSelecting(false)
+    setSelected(new Set())
+  }
+
+  async function removeSelected() {
+    const ids = [...selected]
+    setBusy(`Borrando ${ids.length === 1 ? '1 recuerdo' : `${ids.length} recuerdos`}…`)
+    try {
+      const removed = await inBatches(
+        ids,
+        async (group) => (await postJson<{ removed: number }>('/api/media/borrar', { ids: group })).removed,
+        (done, total) => setBusy(`Borrando ${done} de ${total}…`),
+      )
+      setItems((prev) => prev.filter((m) => !selected.has(m.id)))
+      setNotice(removed === 1 ? 'Se borró 1 recuerdo' : `Se borraron ${removed} recuerdos`)
+      stopSelecting()
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'No se pudieron borrar')
+    } finally {
+      setBusy(null)
+    }
+  }
+
   async function remove(id: string) {
     try {
       await api(`/api/media/${id}`, { method: 'DELETE' })
@@ -296,6 +335,17 @@ export function GalleryApp({ mode, empty }: Props) {
             {kindChip(undefined, 'Todo')}
             {kindChip('photo', 'Fotos')}
             {kindChip('video', 'Videos')}
+            {selectable && items.length > 0 && !readOnly && (
+              <button
+                type="button"
+                aria-pressed={selecting}
+                onClick={() => (selecting ? stopSelecting() : setSelecting(true))}
+                className="opcion flex min-h-10 shrink-0 items-center gap-1.5 rounded-chip px-3.5 text-[12.5px] font-medium hover:-translate-y-0.5 active:scale-95"
+              >
+                <Icon name="check" size={14} strokeWidth={2.4} />
+                Seleccionar
+              </button>
+            )}
           </div>
           <button
             type="button"
@@ -333,6 +383,9 @@ export function GalleryApp({ mode, empty }: Props) {
             <MediaCard
               media={m}
               readOnly={readOnly}
+              selecting={selecting}
+              selected={selected.has(m.id)}
+              onSelect={toggleSelected}
               onOpen={() => setOpen(i)}
               onToggleLike={toggleLike}
               tape={i % 3 === 0 ? TAPES[(i / 3) % TAPES.length].pos : undefined}
@@ -352,6 +405,19 @@ export function GalleryApp({ mode, empty }: Props) {
               {!loading && !cursor && items.length > 6 && <p className="py-8 text-center font-script text-3xl text-fucsia">Eso es todo, por ahora</p>}
             </>
           }
+        />
+      )}
+
+      {selecting && <div aria-hidden="true" className="h-40" />}
+      {selecting && (
+        <SelectionBar
+          count={selected.size}
+          total={items.length}
+          busy={busy}
+          onSelectAll={() => setSelected(new Set(items.map((m) => m.id)))}
+          onClear={() => setSelected(new Set())}
+          onCancel={stopSelecting}
+          onDelete={() => void removeSelected()}
         />
       )}
 

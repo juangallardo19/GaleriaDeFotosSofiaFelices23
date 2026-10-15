@@ -272,3 +272,61 @@ describe('RF-18 · visitantes que entran por el enlace normal (sin QR)', () => {
     expect((await service.list(marta, { sort: 'recientes' })).items[0]).toMatchObject({ likesCount: 0, commentsCount: 1 })
   })
 })
+
+describe('Gestionar recuerdos por lotes', () => {
+  it('el invitado borra varios de sus recuerdos de una vez (Drive incluido)', async () => {
+    const { service, storage, marta } = await setup()
+    const a = await service.register(marta, photo({ driveFileId: 'da' }))
+    const b = await service.register(marta, photo({ driveFileId: 'db' }))
+    const c = await service.register(marta, photo({ driveFileId: 'dc' }))
+    expect(await service.removeMany(marta, [a.id, b.id, a.id])).toEqual({ removed: 2 })
+    expect(storage.removed.sort()).toEqual(['da', 'db'])
+    expect((await service.list(marta, { sort: 'recientes' })).items.map((m) => m.id)).toEqual([c.id])
+  })
+
+  it('si en la selección hay un recuerdo ajeno no se borra nada', async () => {
+    const { service, storage, marta, camilo } = await setup()
+    const mio = await service.register(marta, photo())
+    const ajeno = await service.register(camilo, photo())
+    await expect(service.removeMany(marta, [mio.id, ajeno.id])).rejects.toMatchObject({ code: 'prohibido' })
+    expect(storage.removed).toEqual([])
+    expect((await service.list(marta, { sort: 'recientes' })).items).toHaveLength(2)
+  })
+
+  it('si alguno ya no existe no se borra nada', async () => {
+    const { service, storage, marta } = await setup()
+    const a = await service.register(marta, photo())
+    await expect(service.removeMany(marta, [a.id, 'no-existe'])).rejects.toMatchObject({ code: 'no-encontrado' })
+    expect(storage.removed).toEqual([])
+  })
+
+  it('el admin borra recuerdos de cualquiera', async () => {
+    const { service, marta, camilo, admin } = await setup()
+    const a = await service.register(marta, photo())
+    const b = await service.register(camilo, photo())
+    expect(await service.removeMany(admin, [a.id, b.id])).toEqual({ removed: 2 })
+  })
+
+  it('el visitante no puede borrar', async () => {
+    const { service, marta } = await setup()
+    const a = await service.register(marta, photo())
+    await expect(service.removeMany(VISITOR, [a.id])).rejects.toMatchObject({ code: 'prohibido' })
+  })
+
+  it('pide al menos uno y como máximo 100 por vez', async () => {
+    const { service, marta } = await setup()
+    await expect(service.removeMany(marta, [])).rejects.toMatchObject({ code: 'invalido' })
+    await expect(service.removeMany(marta, Array.from({ length: 101 }, (_, i) => `m${i}`))).rejects.toMatchObject({ code: 'invalido' })
+  })
+
+  it('el admin oculta y muestra varios a la vez; un invitado no puede', async () => {
+    const { service, marta, camilo, admin } = await setup()
+    const a = await service.register(marta, photo())
+    const b = await service.register(camilo, photo())
+    expect(await service.setHiddenMany(admin, [a.id, b.id], true)).toEqual({ updated: 2 })
+    expect((await service.list(marta, { sort: 'recientes' })).items).toEqual([])
+    await service.setHiddenMany(admin, [b.id], false)
+    expect((await service.list(marta, { sort: 'recientes' })).items.map((m) => m.id)).toEqual([b.id])
+    await expect(service.setHiddenMany(marta, [a.id], false)).rejects.toMatchObject({ code: 'prohibido' })
+  })
+})

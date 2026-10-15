@@ -32,6 +32,7 @@ Se escribieron **antes del código** (TDD): primero en rojo y luego se implement
 | RF-14 Admin en /admin, QR y PDF | `unit/admin/*`, `integration/rutas`, `integration/api-completa`, `integration/proxy`, `components/admin-y-hooks`, `e2e` |
 | RF-15 Moderación | `integration/servicio-medios`, `integration/api-completa` |
 | RF-16 Resumen para descargar y carpetas de Drive | `integration/servicio-medios`, `integration/visitantes`, `unit/infra/google`, `components/pantallas` (DownloadSheet) |
+| Gestionar por lotes: el invitado borra varios suyos, el admin borra/oculta/muestra varios | `integration/servicio-medios`, `integration/lotes`, `unit/gallery/lotes-cliente`, `components/seleccion`, `e2e/lotes` |
 | Quién está viendo (/api/me) y estado de la galería | `integration/quien-soy`, `unit/gallery/estado-galeria` |
 | RF-18 Visitantes sin QR (solo ver y descargar) | `integration/visitantes`, `integration/servicio-medios`, `integration/proxy`, `integration/miniaturas`, `components/*` (readOnly), `e2e` |
 | Fotos nuevas en vivo | `unit/gallery/vivo-y-presencia`, `components/galeria` (NewItemsPill) |

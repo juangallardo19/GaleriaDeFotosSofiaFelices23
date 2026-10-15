@@ -9,10 +9,11 @@ export default function MisRecuerdosPage() {
     <>
       <AppHeader />
       <main className="flex-1 px-4 md:px-8">
-        <PageTitle title="Lo que tú capturaste" accent="Mis Recuerdos" text="Todo lo que has subido. Puedes borrar lo que ya no quieras que esté." />
+        <PageTitle title="Lo que tú capturaste" accent="Mis Recuerdos" text="Todo lo que has subido. Toca «Seleccionar» para borrar varios de una vez." />
         <div className="mx-auto max-w-[1440px]">
           <GalleryApp
             mode="mios"
+            selectable
             empty={{ title: 'Todavía no has subido recuerdos', text: 'Las fotos y videos que subas aparecerán aquí.', action: { label: 'Subir recuerdos', href: '/subir' } }}
           />
         </div>

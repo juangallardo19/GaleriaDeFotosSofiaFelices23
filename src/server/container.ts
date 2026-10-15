@@ -23,6 +23,7 @@ export interface AppConfig {
   secureCookies: boolean
   alertEmail: string
   driveFolderUrl: string | null
+  adminLoginLimit?: number
 }
 
 export interface AppContainer {
@@ -59,7 +60,7 @@ export function buildContainer(opts: BuildOptions & { repos: Repos }): AppContai
     thumbs,
     guests: createGuestService({ guests: repos.guests, baseUrl: config.baseUrl, now }),
     media: createMediaService({ ...repos, storage, thumbs, mailer, alertEmail: config.alertEmail, now }),
-    adminLimiter: new SlidingWindowLimiter({ limit: 5, windowMs: 60_000 }),
+    adminLimiter: new SlidingWindowLimiter({ limit: config.adminLoginLimit ?? 5, windowMs: 60_000 }),
   }
 }
 
@@ -90,6 +91,7 @@ export function configFromEnv(env: Record<string, string | undefined> = process.
     secureCookies: baseUrl.startsWith('https://'),
     alertEmail: envValue('ALERT_EMAIL', env) ?? 'sofiacumpleanosgaleriadefotos@gmail.com',
     driveFolderUrl: envValue('NEXT_PUBLIC_DRIVE_FOLDER_URL', env) ?? null,
+    adminLoginLimit: Number.parseInt(envValue('ADMIN_LOGIN_LIMIT', env) ?? '', 10) || 5,
   }
 }
 
