@@ -54,29 +54,36 @@ export function smoothToward(current: number, target: number, dtMs: number, half
   return Math.abs(target - next) < 0.05 ? target : next
 }
 
-// Variables para la animación ligada al scroll (CSS animation-timeline): el navegador la mueve
-// en el mismo hilo del scroll, así que va sincronizada aunque se deslice muy rápido
-export function scrollTimelineVars(layer: HeroLayer, range: number) {
-  return {
-    '--tx': `${round(range * (layer.drift ?? 0))}px`,
-    '--ty': `${layerOffset(range, layer.speed)}px`,
-    '--rango': `${range}px`,
-  }
-}
-
 export function cardAmplitude(k: number, viewportH: number, cardH: number): number {
   return Math.min(CARD_OFFSET_CLAMP, (viewportH / 2 + cardH / 2) * k)
 }
 
-// Safari (y todo navegador de iPhone, que usa su motor) desincroniza estas animaciones al soltar el dedo:
-// las capas saltan a otra posición, así que ahí se mueven con JavaScript
+// Las cards y los gatos usan animaciones con variables de CSS, que Safari (y todo navegador de iPhone, que usa su motor)
+// desincroniza al soltar el dedo: ahí se mueven con JavaScript
 export function scrollTimelineReliable({ supported, vendor }: { supported: boolean; vendor: string }): boolean {
   return supported && !vendor.startsWith('Apple')
 }
 
+export function scrollTimelineAvailable(): boolean {
+  return typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('animation-timeline: scroll()')
+}
+
 export function supportsScrollTimeline(): boolean {
-  const supported = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('animation-timeline: scroll()')
-  return scrollTimelineReliable({ supported, vendor: typeof navigator === 'undefined' ? '' : navigator.vendor })
+  return scrollTimelineReliable({ supported: scrollTimelineAvailable(), vendor: typeof navigator === 'undefined' ? '' : navigator.vendor })
+}
+
+// Animación de la portada ligada al scroll (CSS animation-timeline): el navegador la mueve al ritmo del scroll, así que va
+// fluida aunque se deslice muy rápido. Los valores van escritos en cada capa, sin variables de CSS: con variables, Safari
+// en iPhone las movía bien mientras el dedo estaba en la pantalla y al soltarlo las capas saltaban a otra posición
+export function heroTimelineCss(range: number): string {
+  const keyframes = HERO_LAYERS.map(
+    (layer) =>
+      `@keyframes capa-${layer.id} { from { translate: 0px 0px } to { translate: ${round(range * (layer.drift ?? 0))}px ${layerOffset(range, layer.speed)}px } }`,
+  )
+  const rules = HERO_LAYERS.map(
+    (layer) => `.parallax-${layer.id} { animation: capa-${layer.id} linear both; animation-timeline: scroll(root block); animation-range: 0px ${range}px; }`,
+  )
+  return [...keyframes, '@supports (animation-timeline: scroll()) {', ...rules, '}'].join('\n')
 }
 
 // Scroll que mueve la portada: sin valores negativos del rebote de iPhone y con tope, para que las capas queden en su

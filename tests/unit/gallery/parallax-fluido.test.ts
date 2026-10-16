@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { CARD_OFFSET_CLAMP, HERO_LAYERS, cardAmplitude, heroScrollY, layerOffset, scrollTimelineReliable, scrollTimelineVars, smoothToward } from '@/features/gallery/parallax'
+import {
+  CARD_OFFSET_CLAMP,
+  HERO_LAYERS,
+  cardAmplitude,
+  heroScrollY,
+  heroTimelineCss,
+  layerOffset,
+  scrollTimelineReliable,
+  smoothToward,
+} from '@/features/gallery/parallax'
 
 describe('Parallax fluido con scroll rápido', () => {
   it('el suavizado avanza hacia el objetivo sin saltar de una', () => {
@@ -21,16 +30,6 @@ describe('Parallax fluido con scroll rápido', () => {
     expect(v).toBe(300)
   })
 
-  it('las capas de la portada con animación de scroll terminan donde las pone el parallax de siempre', () => {
-    const rango = 1200
-    for (const layer of HERO_LAYERS) {
-      const vars = scrollTimelineVars(layer, rango)
-      expect(vars['--rango']).toBe(`${rango}px`)
-      expect(Number.parseFloat(vars['--ty'])).toBeCloseTo(layerOffset(rango, layer.speed), 1)
-      expect(Number.parseFloat(vars['--tx'])).toBeCloseTo(rango * (layer.drift ?? 0), 1)
-    }
-  })
-
   it('la amplitud de las cards respeta el límite para que nunca se choquen', () => {
     expect(cardAmplitude(0.15, 800, 300)).toBe(CARD_OFFSET_CLAMP)
     expect(cardAmplitude(0.05, 800, 300)).toBeCloseTo(27.5, 5)
@@ -38,19 +37,37 @@ describe('Parallax fluido con scroll rápido', () => {
   })
 })
 
-describe('Parallax en Safari (iPhone)', () => {
-  it('usa las animaciones de scroll de CSS solo donde funcionan bien (Chrome, Android)', () => {
+describe('Portada con animación ligada al scroll (la variante B elegida en el iPhone)', () => {
+  it('cada capa tiene su propia animación con los valores escritos, sin variables de CSS, porque Safari no las resuelve igual al soltar el dedo', () => {
+    const css = heroTimelineCss(1200)
+    expect(css).not.toContain('var(')
+    for (const layer of HERO_LAYERS) {
+      const tx = Math.round(1200 * (layer.drift ?? 0) * 100) / 100 + 0
+      expect(css).toContain(`@keyframes capa-${layer.id} { from { translate: 0px 0px } to { translate: ${tx}px ${layerOffset(1200, layer.speed)}px } }`)
+      expect(css).toContain(
+        `.parallax-${layer.id} { animation: capa-${layer.id} linear both; animation-timeline: scroll(root block); animation-range: 0px 1200px; }`,
+      )
+    }
+  })
+
+  it('las reglas solo aplican en navegadores que soportan estas animaciones; los demás usan JavaScript', () => {
+    expect(heroTimelineCss(1200)).toMatch(/@supports \(animation-timeline: scroll\(\)\) \{\n\.parallax-banderines/)
+  })
+
+  it('con JavaScript, más allá de la portada las capas quedan en su posición final, no congeladas a medio camino', () => {
+    expect(heroScrollY(300, 1200)).toBe(300)
+    expect(heroScrollY(5000, 1200)).toBe(1200)
+    expect(heroScrollY(-40, 1200)).toBe(0)
+  })
+})
+
+describe('Cards y gatos del fondo en Safari', () => {
+  it('usan las animaciones de scroll de CSS donde funcionan bien (Chrome, Android)', () => {
     expect(scrollTimelineReliable({ supported: true, vendor: 'Google Inc.' })).toBe(true)
     expect(scrollTimelineReliable({ supported: false, vendor: 'Google Inc.' })).toBe(false)
   })
 
-  it('en Safari y en los navegadores de iPhone mueve las capas con JavaScript, porque Safari las desincroniza al soltar el dedo', () => {
+  it('en Safari y en los navegadores de iPhone se mueven con JavaScript', () => {
     expect(scrollTimelineReliable({ supported: true, vendor: 'Apple Computer, Inc.' })).toBe(false)
-  })
-
-  it('más allá de la portada las capas quedan en su posición final, no congeladas a medio camino', () => {
-    expect(heroScrollY(300, 1200)).toBe(300)
-    expect(heroScrollY(5000, 1200)).toBe(1200)
-    expect(heroScrollY(-40, 1200)).toBe(0)
   })
 })

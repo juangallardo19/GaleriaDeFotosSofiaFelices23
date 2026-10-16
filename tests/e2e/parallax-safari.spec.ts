@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
-// Corre con el motor de Safari en un iPhone (proyecto "iphone-safari"). Safari desincroniza las animaciones de scroll
-// de CSS y al soltar el dedo las capas saltaban a otra posición; aquí se mueven con JavaScript, ligadas directo al scroll
+// Corre con el motor de Safari en un iPhone (proyecto "iphone-safari"). La portada usa la animación ligada al scroll con
+// valores fijos por capa (la variante B, elegida probando en un iPhone real): fluida y sin saltos al soltar el dedo
 
 const frames = (page: Page, n: number) =>
   page.evaluate(
@@ -16,12 +16,11 @@ const frames = (page: Page, n: number) =>
 
 test('al soltar el dedo la portada se queda donde está, aunque se haya bajado muy lejos y vuelto', async ({ page }) => {
   await page.goto('/')
-  const banderines = page.getByTestId('capa-banderines')
-  await expect(banderines).toBeVisible()
-  // Espera a que la página cargue su JavaScript: ahí las capas reciben su posición
-  await expect.poll(() => banderines.evaluate((el) => el.style.transform)).not.toBe('')
-  await expect(page.locator('.parallax-scroll')).toHaveCount(0)
-  const translateY = () => banderines.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m42)
+  // Al cargar su JavaScript, cada capa recibe su propia animación ligada al scroll
+  const banderines = page.locator('.parallax-banderines')
+  await expect(banderines).toHaveCount(1)
+  await expect(page.locator('[data-testid^="capa-"] > [class^="parallax-"]')).toHaveCount(11)
+  const translateY = () => banderines.evaluate((el) => Number.parseFloat(getComputedStyle(el).translate.split(' ')[1] ?? '0') || 0)
 
   for (const y of [900, 150, 5000, 600, 1200, 0]) {
     await page.evaluate((y) => window.scrollTo(0, y), y)
@@ -38,7 +37,9 @@ test('al soltar el dedo la portada se queda donde está, aunque se haya bajado m
 test('al soltar el dedo las cards no se siguen acomodando', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('[data-testid="media-frame"]').first()).toBeAttached()
-  await expect.poll(() => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.will-change-transform')].some((el) => el.style.transform !== ''))).toBe(true)
+  await expect
+    .poll(() => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.will-change-transform')].some((el) => el.style.transform !== '')))
+    .toBe(true)
   const posiciones = () =>
     page.evaluate(() =>
       [...document.querySelectorAll('[data-testid="media-frame"]')]

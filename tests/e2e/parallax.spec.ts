@@ -4,9 +4,9 @@ import { expect, test } from '@playwright/test'
 // la animación ligada al scroll las pone en su lugar en el mismo cuadro
 test('el parallax de la portada sigue al scroll aunque sea rapidísimo', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('.parallax-scroll')).toHaveCount(11)
+  await expect(page.locator('[data-testid^="capa-"] > [class^="parallax-"]')).toHaveCount(11)
   const frame = () => page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))))
-  const banderines = page.getByTestId('capa-banderines').locator('.parallax-scroll')
+  const banderines = page.locator('.parallax-banderines')
 
   for (const y of [900, 150, 1200, 0]) {
     await page.evaluate((y) => window.scrollTo(0, y), y)

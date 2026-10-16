@@ -4,6 +4,8 @@ const PORT = 3100
 
 export default defineConfig({
   testDir: 'tests/e2e',
+  // Antes de cualquier prueba confirma que el servidor está en memoria y no conectado a los datos reales
+  globalSetup: './tests/e2e/solo-modo-memoria.ts',
   timeout: 30_000,
   use: { baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`, trace: 'retain-on-failure' },
   projects: [
@@ -18,7 +20,15 @@ export default defineConfig({
         command: `npm run dev -- --port ${PORT}`,
         port: PORT,
         reuseExistingServer: true,
+        // Vacías a propósito: así Next no toma la base, Blob ni Google reales de .env.local y el servidor queda en memoria
         env: {
+          DATABASE_URL: '',
+          BLOB_READ_WRITE_TOKEN: '',
+          GOOGLE_CLIENT_ID: '',
+          GOOGLE_CLIENT_SECRET: '',
+          GOOGLE_REFRESH_TOKEN: '',
+          GOOGLE_API_KEY: '',
+          DEMO_MEDIA: '1',
           E2E_SEED: '1',
           ADMIN_PASSWORD: 'clave-admin-e2e',
           ADMIN_LOGIN_LIMIT: '500',

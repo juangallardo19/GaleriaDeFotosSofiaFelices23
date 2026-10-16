@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type CSSProperties } from 'react'
-import { HERO_LAYERS, heroScrollY, layerOffset, scrollTimelineVars, smoothToward } from '@/features/gallery/parallax'
+import { HERO_LAYERS, heroScrollY, heroTimelineCss, layerOffset, scrollTimelineAvailable, smoothToward } from '@/features/gallery/parallax'
 import { useScrollTimeline } from '@/hooks/useScrollTimeline'
 
 interface Placement {
@@ -148,7 +148,8 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
   const root = useRef<HTMLDivElement>(null)
   const cue = useRef<HTMLSpanElement>(null)
 
-  const cssScroll = useScrollTimeline() && !reducedMotion
+  // Con animaciones ligadas al scroll el navegador mueve las capas al ritmo del scroll; si no las soporta, JavaScript
+  const cssScroll = useScrollTimeline(scrollTimelineAvailable) && !reducedMotion
 
   useEffect(() => {
     if (reducedMotion) {
@@ -226,6 +227,7 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
 
   return (
     <div ref={root} className="relative mx-auto w-full max-w-[520px] overflow-hidden md:max-w-[1440px]">
+      {cssScroll && <style>{heroTimelineCss(SCROLL_RANGE)}</style>}
       <div className="relative aspect-[390/770] w-full md:aspect-[1440/960]">
         {HERO_LAYERS.map((layer) => {
           const art = ART[layer.id]
@@ -245,10 +247,7 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
                 else layers.current.delete(layer.id)
               }}
             >
-              <div
-                className={cssScroll ? 'parallax-scroll' : undefined}
-                style={cssScroll ? (scrollTimelineVars(layer, SCROLL_RANGE) as CSSProperties) : undefined}
-              >
+              <div className={cssScroll ? `parallax-${layer.id}` : undefined}>
                 <div className="entrada" style={{ '--animacion': art.entrance[0], '--retraso': `${art.entrance[1]}ms` } as CSSProperties}>
                   <img
                     src={art.src}
