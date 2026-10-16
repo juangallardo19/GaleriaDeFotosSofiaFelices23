@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, type CSSProperties } from 'react'
-import { HERO_LAYERS, layerOffset } from '@/features/gallery/parallax'
+import { HERO_LAYERS, layerOffset, scrollTimelineVars, smoothToward } from '@/features/gallery/parallax'
+import { useScrollTimeline } from '@/hooks/useScrollTimeline'
 
 interface Placement {
   x: number
@@ -122,6 +123,10 @@ const ART: Record<string, LayerArt> = {
   },
 }
 
+// Recorrido del scroll en el que se completa el parallax de la portada (mayor que la portada más alta)
+const SCROLL_RANGE = 1200
+const HALF_LIFE_MS = 60
+
 const pct = (value: number, total: number) => `${((value / total) * 100).toFixed(3)}%`
 
 function placementVars(art: LayerArt): CSSProperties {
@@ -143,60 +148,72 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
   const root = useRef<HTMLDivElement>(null)
   const cue = useRef<HTMLSpanElement>(null)
 
+  const cssScroll = useScrollTimeline() && !reducedMotion
+
   useEffect(() => {
     if (reducedMotion) {
       layers.current.forEach((el) => (el.style.transform = ''))
       return
     }
-    let frame = 0
     const pointer = { x: 0, y: 0 }
-    const update = () => {
+    const current = new Map<string, { x: number; y: number }>()
+    let frame = 0
+    let last = 0
+    // Un solo bucle: se mueve hacia el objetivo con suavizado y se detiene cuando todo llegó
+    const tick = (now: number) => {
       frame = 0
+      const dt = Math.min(64, now - (last || now - 16))
+      last = now
       const y = window.scrollY
       // La invitación a deslizar se desvanece apenas la persona empieza a bajar
       if (cue.current) cue.current.style.opacity = String(Math.max(0, 1 - y / 140))
-      const limit = (root.current?.offsetHeight ?? 1000) * 1.2
-      if (y > limit) return
+      if (y > (root.current?.offsetHeight ?? 1000) * 1.2) return
+      let moving = false
       for (const layer of HERO_LAYERS) {
         const el = layers.current.get(layer.id)
         if (!el) continue
         // Profundidad: lo que está más al frente se mueve más con el mouse
         const depth = layer.speed - 0.15
-        const x = y * (layer.drift ?? 0) + pointer.x * depth * 16
-        const dy = layerOffset(y, layer.speed) + pointer.y * depth * 10
-        el.style.transform = `translate3d(${x.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`
+        const tx = (cssScroll ? 0 : y * (layer.drift ?? 0)) + pointer.x * depth * 16
+        const ty = (cssScroll ? 0 : layerOffset(y, layer.speed)) + pointer.y * depth * 10
+        const prev = current.get(layer.id) ?? { x: tx, y: ty }
+        const next = { x: smoothToward(prev.x, tx, dt, HALF_LIFE_MS), y: smoothToward(prev.y, ty, dt, HALF_LIFE_MS) }
+        current.set(layer.id, next)
+        if (next.x !== tx || next.y !== ty) moving = true
+        el.style.transform = `translate3d(${next.x.toFixed(2)}px, ${next.y.toFixed(2)}px, 0)`
       }
+      if (moving) frame = requestAnimationFrame(tick)
     }
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update)
+    const kick = () => {
+      if (!frame) frame = requestAnimationFrame(tick)
     }
     const onPointer = (e: PointerEvent) => {
       const r = root.current?.getBoundingClientRect()
       if (!r) return
       pointer.x = ((e.clientX - r.left) / r.width - 0.5) * 2
       pointer.y = ((e.clientY - r.top) / r.height - 0.5) * 2
-      schedule()
+      kick()
     }
     const onLeave = () => {
       pointer.x = 0
       pointer.y = 0
-      schedule()
+      kick()
     }
     const finePointer = window.matchMedia?.('(pointer: fine)').matches
     const el = root.current
-    update()
-    window.addEventListener('scroll', schedule, { passive: true })
+    kick()
+    window.addEventListener('scroll', kick, { passive: true })
     if (finePointer && el) {
       el.addEventListener('pointermove', onPointer)
       el.addEventListener('pointerleave', onLeave)
     }
     return () => {
-      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('scroll', kick)
       el?.removeEventListener('pointermove', onPointer)
       el?.removeEventListener('pointerleave', onLeave)
       cancelAnimationFrame(frame)
     }
-  }, [reducedMotion])
+  }, [reducedMotion, cssScroll])
 
   return (
     <div ref={root} className="relative mx-auto w-full max-w-[520px] overflow-hidden md:max-w-[1440px]">
@@ -219,18 +236,23 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
                 else layers.current.delete(layer.id)
               }}
             >
-              <div className="entrada" style={{ '--animacion': art.entrance[0], '--retraso': `${art.entrance[1]}ms` } as CSSProperties}>
-                <img
-                  src={art.src}
-                  alt={art.alt}
-                  width={1000}
-                  height={Math.round(1000 * art.ratio)}
-                  decoding="async"
-                  fetchPriority={art.priority ? 'high' : 'auto'}
-                  className={`h-auto w-full select-none rotate-[var(--rm)] md:rotate-[var(--rd)] ${art.float && !reducedMotion ? 'flotar' : ''}`}
-                  style={{ '--rm': `${rotM}deg`, '--rd': `${rotD}deg` } as CSSProperties}
-                  draggable={false}
-                />
+              <div
+                className={cssScroll ? 'parallax-scroll' : undefined}
+                style={cssScroll ? (scrollTimelineVars(layer, SCROLL_RANGE) as CSSProperties) : undefined}
+              >
+                <div className="entrada" style={{ '--animacion': art.entrance[0], '--retraso': `${art.entrance[1]}ms` } as CSSProperties}>
+                  <img
+                    src={art.src}
+                    alt={art.alt}
+                    width={1000}
+                    height={Math.round(1000 * art.ratio)}
+                    decoding="async"
+                    fetchPriority={art.priority ? 'high' : 'auto'}
+                    className={`h-auto w-full select-none rotate-[var(--rm)] md:rotate-[var(--rd)] ${art.float && !reducedMotion ? 'flotar' : ''}`}
+                    style={{ '--rm': `${rotM}deg`, '--rd': `${rotD}deg` } as CSSProperties}
+                    draggable={false}
+                  />
+                </div>
               </div>
             </div>
           )

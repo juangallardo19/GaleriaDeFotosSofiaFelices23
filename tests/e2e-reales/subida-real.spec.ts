@@ -32,10 +32,13 @@ test('un invitado sube fotos y videos reales desde el celular, se ven en el álb
 
     await page.goto('/subir')
     await page.getByLabel('Elegir de la galería').setInputFiles(FILES)
-    await expect(page.getByText(/Subiendo \d+ de \d+/)).toBeVisible()
-    await expect(page.getByText('¡Gracias!')).toBeVisible({ timeout: 12 * 60_000 })
-    await expect(page.getByText(`Tus ${FILES.length} recuerdos ya están en el álbum de Sofi.`)).toBeVisible()
-    await expect(page.getByText('No se pudo subir')).toHaveCount(0)
+    await expect(page.getByText(/Subiendo \d+ de \d+/).first()).toBeVisible()
+    // El invitado se va a ver el álbum mientras sube: la subida sigue en la mini barra
+    await page.getByRole('link', { name: 'Inicio del álbum de Sofi' }).click()
+    await page.waitForURL(/\/$/)
+    const dock = page.getByRole('region', { name: 'Subida en curso' })
+    await expect(dock).toBeVisible()
+    await expect(dock).toContainText(`¡Listo! Tus ${FILES.length} recuerdos ya están en el álbum.`, { timeout: 12 * 60_000 })
 
     await page.goto('/mis-recuerdos')
     const cards = page.getByRole('button', { name: new RegExp(`^Abrir (foto|video) de ${NOMBRE}$`) })

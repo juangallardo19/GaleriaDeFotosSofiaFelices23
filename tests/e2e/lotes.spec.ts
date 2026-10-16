@@ -70,7 +70,11 @@ test('el admin cambia el nombre de un invitado con el lápiz y el QR sigue siend
   await page.getByRole('button', { name: `Editar a ${nombre}` }).click()
   const campo = page.getByRole('textbox', { name: `Nuevo nombre de ${nombre}` })
   await campo.fill(`${nombre} Gómez`)
+  // Se espera el guardado real: la fila del editor también "contiene" el nombre nuevo porque está escrito en el campo
+  const guardado = page.waitForResponse((r) => r.request().method() === 'PATCH' && r.url().includes('/api/admin/guests/'))
   await campo.press('Enter')
+  expect((await guardado).ok()).toBe(true)
+  await expect(campo).toBeHidden()
   await expect(page.getByRole('row', { name: new RegExp(`${nombre} Gómez`) })).toBeVisible()
 
   await page.context().clearCookies()

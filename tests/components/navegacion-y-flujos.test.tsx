@@ -111,6 +111,7 @@ describe('RNF-08 · progreso de la subida', () => {
   it('pide no bloquear la pantalla mientras sube', () => {
     render(<UploadList snapshot={snapshot} onRetry={() => {}} onCancel={() => {}} />)
     expect(screen.getByText(/No bloquees la pantalla/)).toBeInTheDocument()
+    expect(screen.getByText(/si cierras o sales de la página, la subida se detiene/)).toBeInTheDocument()
   })
 
   it('permite reintentar lo que falló', async () => {

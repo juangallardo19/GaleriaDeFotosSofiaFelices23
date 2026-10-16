@@ -46,3 +46,28 @@ export function columnFactors(columns: number): readonly number[] {
   const base = columns <= 2 ? COLUMN_FACTORS.mobile : COLUMN_FACTORS.desktop
   return Array.from({ length: columns }, (_, i) => base[i % base.length])
 }
+
+// Suavizado exponencial independiente de los cuadros por segundo: en un scroll rapidísimo
+// la capa recorre el salto en varios cuadros en vez de teletransportarse
+export function smoothToward(current: number, target: number, dtMs: number, halfLifeMs: number): number {
+  const next = current + (target - current) * (1 - Math.pow(2, -dtMs / halfLifeMs))
+  return Math.abs(target - next) < 0.05 ? target : next
+}
+
+// Variables para la animación ligada al scroll (CSS animation-timeline): el navegador la mueve
+// en el mismo hilo del scroll, así que va sincronizada aunque se deslice muy rápido
+export function scrollTimelineVars(layer: HeroLayer, range: number) {
+  return {
+    '--tx': `${round(range * (layer.drift ?? 0))}px`,
+    '--ty': `${layerOffset(range, layer.speed)}px`,
+    '--rango': `${range}px`,
+  }
+}
+
+export function cardAmplitude(k: number, viewportH: number, cardH: number): number {
+  return Math.min(CARD_OFFSET_CLAMP, (viewportH / 2 + cardH / 2) * k)
+}
+
+export function supportsScrollTimeline(): boolean {
+  return typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('animation-timeline: scroll()')
+}

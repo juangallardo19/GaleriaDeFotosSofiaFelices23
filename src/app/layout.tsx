@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Montserrat, Pinyon_Script, Radley } from 'next/font/google'
+import { UploadDockContainer } from '@/components/upload/UploadDockContainer'
+import { UploadProvider } from '@/components/upload/UploadProvider'
 import './globals.css'
 
 const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat', display: 'swap' })
@@ -19,7 +21,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="es" className={`${montserrat.variable} ${radley.variable} ${pinyon.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <UploadProvider>
+          {children}
+          <UploadDockContainer />
+        </UploadProvider>
+      </body>
     </html>
   )
 }

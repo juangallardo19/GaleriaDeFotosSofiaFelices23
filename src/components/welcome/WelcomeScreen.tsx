@@ -1,4 +1,5 @@
 import { scriptCase } from '@/lib/format'
+import { SofiPortrait } from '@/components/ui/SofiPortrait'
 
 export function WelcomeScreen({ guestName, progress }: { guestName: string; progress: number }) {
   const p = Math.max(0, Math.min(1, progress))
@@ -20,10 +21,9 @@ export function WelcomeScreen({ guestName, progress }: { guestName: string; prog
       <div className="relative mt-6">
         <span aria-hidden="true" className="absolute -top-3 left-1/2 z-10 h-[22px] w-[68px] -translate-x-1/2 rotate-[4deg] bg-[#F7B8CF]/85" />
         <figure className="w-[196px] -rotate-[4deg] rounded-[10px] bg-[#FFFDF8] p-3 pb-2 shadow-[0_14px_26px_rgb(90_18_56/0.18),0_2px_4px_rgb(90_18_56/0.1)] md:w-[230px]">
-          <div className="relative aspect-square overflow-hidden rounded-md bg-rosa">
-            <img src="/assets/sofi.webp" alt="Sofi" width={656} height={900} className="absolute -left-[15%] -top-[4%] w-[132%] max-w-none" />
+          <SofiPortrait>
             <div className="absolute inset-0 bg-gradient-to-br from-[#3A0B24] to-[#7A4A2A] transition-opacity duration-500" style={{ opacity: Math.max(0, 1 - p * 1.05) }} />
-          </div>
+          </SofiPortrait>
           <figcaption className="pt-2 font-script text-[26px] text-fucsia">Sofi · 23</figcaption>
         </figure>
       </div>

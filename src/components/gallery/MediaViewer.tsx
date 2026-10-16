@@ -171,6 +171,8 @@ export function MediaViewer({ media, position, onClose, onPrev, onNext, onToggle
             )}
             <a
               href={media.downloadPath}
+              target="_blank"
+              rel="noopener"
               aria-label={`Descargar · ${media.downloadsCount}`}
               className="inline-flex min-h-11 items-center gap-2 rounded-boton bg-crema px-4 text-sm font-semibold text-fucsia"
             >

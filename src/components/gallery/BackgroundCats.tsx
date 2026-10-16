@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { BACKGROUND_CATS_SPEED } from '@/features/gallery/parallax'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { BACKGROUND_CATS_SPEED, smoothToward } from '@/features/gallery/parallax'
+import { useScrollTimeline } from '@/hooks/useScrollTimeline'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 // Botellita de fondo: difuminada y al 15 %, nunca pegada a los bordes; una cada ~420 px y cada una con su velocidad
@@ -16,51 +17,69 @@ const CATS = [
 ]
 const SPACING = 420
 
+// Recorrido del fondo mientras la gatita cruza la pantalla: más lenta que la página
+const catAmplitude = (c: (typeof CATS)[number], viewportH: number) => Math.round((viewportH / 2 + c.w / 2) * (1 - c.speed))
+
 export function BackgroundCats() {
   const reducedMotion = usePrefersReducedMotion()
   const refs = useRef<(HTMLImageElement | null)[]>([])
   const box = useRef<HTMLDivElement>(null)
   const [count, setCount] = useState(0)
+  const cssScroll = useScrollTimeline() && !reducedMotion
+  const [viewportH, setViewportH] = useState(800)
 
   useEffect(() => {
     const el = box.current
     if (!el) return
-    const ro = new ResizeObserver(() => setCount(Math.max(1, Math.floor(el.clientHeight / SPACING))))
+    const ro = new ResizeObserver(() => {
+      setCount(Math.max(1, Math.floor(el.clientHeight / SPACING)))
+      setViewportH(window.innerHeight)
+    })
     ro.observe(el)
     return () => ro.disconnect()
   }, [])
 
+  // Plan B sin animaciones de scroll en CSS: suavizado para que no salten con un scroll rápido
   useEffect(() => {
-    if (reducedMotion) {
-      refs.current.forEach((el) => el && (el.style.transform = ''))
+    if (reducedMotion || cssScroll) {
+      refs.current.forEach((el, i) => el && (el.style.transform = `rotate(${CATS[i % CATS.length].rot}deg)`))
       return
     }
+    const current = new Map<number, number>()
     let frame = 0
-    const update = () => {
+    let last = 0
+    const tick = (now: number) => {
       frame = 0
+      const dt = Math.min(64, now - (last || now - 16))
+      last = now
       const vh = window.innerHeight
+      let moving = false
       refs.current.forEach((el, i) => {
-        if (!el?.parentElement || !CATS[i % CATS.length]) return
+        if (!el?.parentElement) return
         const cat = CATS[i % CATS.length]
         const r = el.parentElement.getBoundingClientRect()
-        if (r.bottom < -400 || r.top > vh + 400) return
         // Más lenta que la página: se queda atrás mientras el contenido sube
-        const offset = (vh / 2 - (r.top + r.height / 2)) * (1 - cat.speed)
-        el.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0) rotate(${cat.rot}deg)`
+        const target = (vh / 2 - (r.top + r.height / 2)) * (1 - cat.speed)
+        const prev = current.get(i)
+        const next = prev === undefined || r.bottom < -400 || r.top > vh + 400 ? target : smoothToward(prev, target, dt, 90)
+        current.set(i, next)
+        if (next !== target) moving = true
+        el.style.transform = `translate3d(0, ${next.toFixed(2)}px, 0) rotate(${cat.rot}deg)`
       })
+      if (moving) frame = requestAnimationFrame(tick)
     }
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(update)
+    const kick = () => {
+      if (!frame) frame = requestAnimationFrame(tick)
     }
-    update()
-    window.addEventListener('scroll', schedule, { passive: true })
-    window.addEventListener('resize', schedule)
+    kick()
+    window.addEventListener('scroll', kick, { passive: true })
+    window.addEventListener('resize', kick)
     return () => {
-      window.removeEventListener('scroll', schedule)
-      window.removeEventListener('resize', schedule)
+      window.removeEventListener('scroll', kick)
+      window.removeEventListener('resize', kick)
       cancelAnimationFrame(frame)
     }
-  }, [reducedMotion, count])
+  }, [reducedMotion, cssScroll, count])
 
   return (
     <div ref={box} aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
@@ -75,8 +94,13 @@ export function BackgroundCats() {
             width={320}
             height={320}
             loading="lazy"
-            className="w-full opacity-15 blur-[2px] transition-opacity duration-1000 will-change-transform"
-            style={{ transform: `rotate(${c.rot}deg)` }}
+            className={`w-full opacity-15 blur-[2px] ${cssScroll ? 'parallax-vista' : 'will-change-transform'}`}
+            style={
+              {
+                transform: `rotate(${c.rot}deg)`,
+                ...(cssScroll && { '--desde': `${-catAmplitude(c, viewportH)}px`, '--hasta': `${catAmplitude(c, viewportH)}px` }),
+              } as CSSProperties
+            }
           />
         </div>
       ))}

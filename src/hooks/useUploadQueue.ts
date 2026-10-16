@@ -6,7 +6,7 @@ import type { FileInfo, QueueSnapshot, UploadQueue } from '@/features/upload/upl
 
 // Conecta la cola (Observer) con React y con el navegador: título de la pestaña, aviso al cerrar,
 // pantalla encendida mientras sube y notificación al terminar
-export function useUploadQueue<F extends FileInfo>(queue: UploadQueue<F>, baseTitle: string): QueueSnapshot<F> {
+export function useUploadQueue<F extends FileInfo>(queue: UploadQueue<F>, baseTitle: string | (() => string)): QueueSnapshot<F> {
   const snapshot = useSyncExternalStore(
     (onChange) => queue.subscribe(onChange),
     queue.getSnapshot,
@@ -19,9 +19,12 @@ export function useUploadQueue<F extends FileInfo>(queue: UploadQueue<F>, baseTi
 
   useEffect(() => {
     latest.current = snapshot
-    document.title = progressTitle(snapshot, baseTitle)
-
     const busy = shouldBlockUnload(snapshot)
+    const base = typeof baseTitle === 'function' ? baseTitle() : baseTitle
+    // Solo toca el título mientras sube (y al terminar lo devuelve): así no pisa el título de cada página
+    if (busy) document.title = progressTitle(snapshot, base)
+    else if (wasBusy.current) document.title = base
+
     wakeLock.current ??= new WakeLockManager(navigator as never, document)
     if (busy && !wasBusy.current) {
       doneAtStart.current = snapshot.done
@@ -45,9 +48,8 @@ export function useUploadQueue<F extends FileInfo>(queue: UploadQueue<F>, baseTi
     return () => {
       window.removeEventListener('beforeunload', onBeforeUnload)
       void wakeLock.current?.release()
-      document.title = baseTitle
     }
-  }, [baseTitle])
+  }, [])
 
   return snapshot
 }

@@ -3,13 +3,12 @@
 import { useRouter } from 'next/navigation'
 import { ApiError, postJson } from '@/lib/api'
 import { AdminLoginForm } from '@/components/admin/AdminLoginForm'
+import { SofiPortrait } from '@/components/ui/SofiPortrait'
 
-function Polaroid({ src, alt, className, caption }: { src: string; alt: string; className: string; caption?: string }) {
+function Polaroid({ className, caption }: { className: string; caption?: string }) {
   return (
     <figure className={`absolute rounded-[10px] bg-[#FFFDF8] p-3 pb-2 shadow-[0_14px_26px_rgb(90_18_56/0.18)] ${className}`}>
-      <div className="aspect-square overflow-hidden rounded-md bg-rosa">
-        <img src={src} alt={alt} className="h-full w-full object-cover object-top" />
-      </div>
+      <SofiPortrait />
       {caption && <figcaption className="pt-1.5 text-center font-script text-2xl text-fucsia">{caption}</figcaption>}
     </figure>
   )
@@ -32,7 +31,7 @@ export default function AdminLoginPage() {
     <main className="flex min-h-dvh flex-1">
       <div aria-hidden="true" className="relative hidden flex-1 overflow-hidden bg-rosa/45 lg:block">
         <img src="/assets/banderines.webp" alt="" className="entrada absolute left-[6%] top-0 w-[88%] [--animacion:entrar-caer]" />
-        <Polaroid src="/assets/sofi.webp" alt="" caption="Sofi · 23" className="entrada left-[34%] top-[28%] w-[240px] -rotate-[5deg] [--retraso:200ms]" />
+        <Polaroid caption="Sofi · 23" className="entrada left-[34%] top-[28%] w-[240px] -rotate-[5deg] [--retraso:200ms]" />
         <img
           src="/assets/corazon.webp"
           alt=""

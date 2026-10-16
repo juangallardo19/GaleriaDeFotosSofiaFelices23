@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const blob = vi.hoisted(() => ({ put: vi.fn(), get: vi.fn(), del: vi.fn() }))
 vi.mock('@vercel/blob', () => blob)
 
-import { BlobThumbStore, THUMB_ROUTE, blobAccess, isThumbPath } from '@/server/storage/thumbs'
+import { BlobThumbStore, MemoryThumbStore, THUMB_ROUTE, blobAccess, isThumbPath } from '@/server/storage/thumbs'
 
 const data = new Uint8Array([1, 2, 3]).buffer
 
@@ -87,5 +87,29 @@ describe('Tipo de almacén según BLOB_ACCESS', () => {
     expect(blobAccess('private')).toBe('private')
     expect(blobAccess(undefined)).toBe('private')
     expect(blobAccess('otro')).toBe('private')
+  })
+})
+
+describe('Miniaturas en desarrollo (sin Blob)', () => {
+  it('guarda la miniatura en memoria y devuelve una ruta corta que el registro acepta', async () => {
+    const store = new MemoryThumbStore()
+    const grande = new Uint8Array(20_000).fill(7).buffer
+    const url = await store.put({ data: grande, contentType: 'image/webp', variant: 'thumb' })
+    expect(url.startsWith(`${THUMB_ROUTE}/thumbs/`)).toBe(true)
+    expect(url.length).toBeLessThan(200)
+    const path = url.slice(THUMB_ROUTE.length + 1)
+    expect(isThumbPath(path)).toBe(true)
+    const file = await store.read(path)
+    expect(file?.contentType).toBe('image/webp')
+    expect(file?.size).toBe(20_000)
+    expect(new Uint8Array(await new Response(file!.body).arrayBuffer())).toEqual(new Uint8Array(grande))
+  })
+
+  it('las vistas previas van en otra carpeta y se pueden borrar', async () => {
+    const store = new MemoryThumbStore()
+    const url = await store.put({ data, contentType: 'image/jpeg', variant: 'preview' })
+    expect(url.startsWith(`${THUMB_ROUTE}/previews/`) && url.endsWith('.jpg')).toBe(true)
+    await store.remove(url)
+    expect(await store.read(url.slice(THUMB_ROUTE.length + 1))).toBeNull()
   })
 })

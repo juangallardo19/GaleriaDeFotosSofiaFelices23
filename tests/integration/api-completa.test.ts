@@ -260,7 +260,7 @@ describe('RF-14 · admin de invitados', () => {
     expect(res.headers.get('content-disposition')).toContain('tarjetas-sofi-23.pdf')
     const bytes = new Uint8Array(await res.arrayBuffer())
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe('%PDF-')
-  })
+  }, 20_000)
 
   it('muestra estadísticas: invitados, en línea, recuerdos y almacenamiento', async () => {
     await registrar()

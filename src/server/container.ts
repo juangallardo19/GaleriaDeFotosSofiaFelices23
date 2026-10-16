@@ -12,7 +12,7 @@ import { createGuestService, type GuestService } from './services/guest-service'
 import { createMediaService, type MediaService } from './services/media-service'
 import { envValue } from './env'
 import { DevStorage } from './storage/dev'
-import { BlobThumbStore, InlineThumbStore, blobAccess, type ThumbStore } from './storage/thumbs'
+import { BlobThumbStore, MemoryThumbStore, blobAccess, type ThumbStore } from './storage/thumbs'
 import type { StorageProvider } from './storage/types'
 import type { CardArt } from '@/features/admin/cards-pdf'
 
@@ -107,7 +107,7 @@ async function createDefaultContainer(): Promise<AppContainer> {
     const marta = await repos.guests.create({ name: 'Tía Marta', token: E2E_TOKEN })
     if (process.env.DEMO_MEDIA === '1') await (await import('./dev-seed')).seedDemo(repos, marta.id)
   }
-  const thumbs = process.env.BLOB_READ_WRITE_TOKEN ? new BlobThumbStore({ access: blobAccess(process.env.BLOB_ACCESS) }) : new InlineThumbStore()
+  const thumbs = process.env.BLOB_READ_WRITE_TOKEN ? new BlobThumbStore({ access: blobAccess(process.env.BLOB_ACCESS) }) : new MemoryThumbStore()
   return buildContainer({ repos, storage: new DevStorage(), thumbs, mailer: new ConsoleMailer(), config })
 }
 

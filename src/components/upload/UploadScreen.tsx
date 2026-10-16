@@ -1,48 +1,20 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useRef, useState } from 'react'
-import { makeThumbnails } from '@/features/upload/browser-thumbnails'
-import { uploadResumable } from '@/features/upload/drive-upload'
-import { dedupeFiles, fingerprint } from '@/features/upload/fingerprint'
-import { createPipelineUploader } from '@/features/upload/pipeline'
-import { UploadQueue } from '@/features/upload/upload-queue'
-import type { MediaKind } from '@/features/media/media-kind'
-import { api, postJson } from '@/lib/api'
-import { SITE_TITLE } from '@/lib/event'
-import { useUploadQueue } from '@/hooks/useUploadQueue'
+import { useState } from 'react'
 import { buttonClass } from '@/components/ui/Button'
 import { Icon } from '@/components/ui/Icon'
 import { Reveal } from '@/components/ui/Reveal'
 import { UploadList } from './UploadList'
 import { UploadPicker } from './UploadPicker'
-
-function createQueue() {
-  const uploader = createPipelineUploader({
-    makeThumbnails,
-    uploadThumb: async (blob, variant) =>
-      (await api<{ url: string }>(`/api/uploads/thumb?variant=${variant}`, { method: 'POST', headers: { 'content-type': blob.type }, body: blob })).url,
-    initUpload: (file) => postJson<{ uploadUrl: string; kind: MediaKind }>('/api/uploads/init', { name: file.name, size: file.size, type: file.type }),
-    uploadFile: (file, uploadUrl, opts) => uploadResumable({ file, uploadUrl, ...opts }),
-    register: (payload) => postJson('/api/media', payload),
-  })
-  return new UploadQueue<File>({ uploader })
-}
+import { useUploads } from './UploadProvider'
 
 export function UploadScreen() {
-  const queue = useMemo(() => createQueue(), [])
-  const snapshot = useUploadQueue(queue, `Subir recuerdos · ${SITE_TITLE}`)
-  const seen = useRef(new Set<string>())
+  const { snapshot, add, retry, cancel } = useUploads()
   const [skipped, setSkipped] = useState(0)
 
   function select(files: File[]) {
-    const { unique, duplicates } = dedupeFiles(seen.current, files)
-    unique.forEach((f) => seen.current.add(fingerprint(f)))
-    setSkipped(duplicates.length)
-    if (unique.length === 0) return
-    if (typeof Notification !== 'undefined' && Notification.permission === 'default') void Notification.requestPermission().catch(() => {})
-    queue.add(unique)
-    queue.start()
+    setSkipped(add(files))
   }
 
   const finished = snapshot.isIdle && snapshot.done > 0
@@ -66,12 +38,12 @@ export function UploadScreen() {
             </li>
             <li className="flex gap-2.5">
               <Icon name="check" size={18} strokeWidth={2.2} className="mt-0.5 shrink-0 text-fucsia" />
-              Deja esta página abierta mientras sube; te avisamos cuando termine.
+              Mientras sube puedes seguir viendo el álbum; el avance queda en una barrita abajo.
             </li>
           </ul>
         </Reveal>
       )}
-      <UploadList snapshot={snapshot} onRetry={(id) => queue.retry(id)} onCancel={(id) => queue.cancel(id)} />
+      <UploadList snapshot={snapshot} onRetry={retry} onCancel={cancel} />
       {finished && (
         <div className="tarjeta entrada flex flex-col items-center gap-3 bg-rosa/80 p-6 text-center [--animacion:entrar-pop]">
           <p className="font-script text-5xl text-fucsia">¡Gracias!</p>

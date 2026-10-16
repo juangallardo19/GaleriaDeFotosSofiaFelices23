@@ -64,9 +64,23 @@ export class BlobThumbStore implements ThumbStore {
   }
 }
 
-// En desarrollo sin token de Blob, la miniatura viaja como data URL
-export class InlineThumbStore implements ThumbStore {
-  async put(input: { data: ArrayBuffer; contentType: string }) {
-    return `data:${input.contentType};base64,${Buffer.from(input.data).toString('base64')}`
+// En desarrollo sin token de Blob, la miniatura queda en memoria y se sirve por la misma ruta que en producción
+export class MemoryThumbStore implements ThumbStore {
+  private readonly files = new Map<string, { data: ArrayBuffer; contentType: string }>()
+
+  async put(input: { data: ArrayBuffer; contentType: string; variant: ThumbVariant }) {
+    const path = `${input.variant}s/${crypto.randomUUID()}.${input.contentType === 'image/jpeg' ? 'jpg' : 'webp'}`
+    this.files.set(path, { data: input.data.slice(0), contentType: input.contentType })
+    return `${THUMB_ROUTE}/${path}`
+  }
+
+  async read(path: string): Promise<ThumbFile | null> {
+    const file = this.files.get(path)
+    if (!file) return null
+    return { body: new Blob([file.data]).stream(), contentType: file.contentType, size: file.data.byteLength }
+  }
+
+  async remove(url: string) {
+    if (url.startsWith(`${THUMB_ROUTE}/`)) this.files.delete(url.slice(THUMB_ROUTE.length + 1))
   }
 }

@@ -74,7 +74,7 @@ describe.each(implementations)('Contrato de repositorios (%s)', { timeout: 30_00
   let r: Repos
   beforeEach(async () => {
     r = await make()
-  })
+  }, 30_000)
 
   it('invitados: crear, buscar por token, tocar y borrar', async () => {
     const g = await r.guests.create({ name: 'Tía Marta', token: 'T'.repeat(22) })

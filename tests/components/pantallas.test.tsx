@@ -124,6 +124,11 @@ describe('RF-12 · ver una foto o un video', () => {
     expect(screen.getByRole('link', { name: 'Descargar · 12' })).toHaveAttribute('href', '/api/media/m1/download')
   })
 
+  it('descargar abre en otra pestaña para no cortar una subida en curso', () => {
+    render(<MediaViewer media={viewerMedia()} onClose={() => {}} onPrev={() => {}} onNext={() => {}} onToggleLike={() => {}} />)
+    expect(screen.getByRole('link', { name: 'Descargar · 12' })).toHaveAttribute('target', '_blank')
+  })
+
   it('se navega con botones y con las flechas del teclado, y Escape cierra', async () => {
     const onPrev = vi.fn()
     const onNext = vi.fn()

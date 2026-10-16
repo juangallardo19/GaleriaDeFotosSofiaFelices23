@@ -292,3 +292,33 @@ body::before {
 .cascada {
   animation: cascada 1.8s ease-in-out infinite;
 }
+
+/* Parallax ligado al scroll: el navegador lo mueve en el hilo del scroll, fluido aunque se deslice muy rápido */
+@keyframes parallax-capa {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: var(--tx, 0px) var(--ty, 0px);
+  }
+}
+@keyframes parallax-vista {
+  from {
+    translate: 0 var(--desde, 0px);
+  }
+  to {
+    translate: 0 var(--hasta, 0px);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .parallax-scroll {
+    animation: parallax-capa linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0px var(--rango, 1000px);
+  }
+  .parallax-vista {
+    animation: parallax-vista linear both;
+    animation-timeline: view();
+    animation-range: cover;
+  }
+}

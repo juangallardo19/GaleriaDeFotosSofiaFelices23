@@ -74,7 +74,7 @@ export function UploadList({ snapshot, onRetry, onCancel }: Props) {
         {busy && (
           <p className="mt-3 flex items-start gap-2 text-xs leading-relaxed opacity-80">
             <Icon name="alert" size={16} strokeWidth={2} className="mt-px shrink-0 text-naranja" />
-            No bloquees la pantalla ni cierres esta página mientras se suben tus recuerdos.
+            No bloquees la pantalla. Puedes seguir viendo el álbum mientras sube (verás el avance abajo), pero si cierras o sales de la página, la subida se detiene.
           </p>
         )}
       </div>

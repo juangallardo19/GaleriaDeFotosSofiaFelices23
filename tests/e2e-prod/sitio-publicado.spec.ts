@@ -62,14 +62,18 @@ test('con QR: sube fotos y videos reales desde el celular y se ven en el álbum'
 
   await page.goto('/subir')
   await page.getByLabel('Elegir de la galería').setInputFiles(FILES)
-  const done = page.getByText('¡Gracias!')
-  const failed = page.getByText('No se pudo subir').first()
-  await expect(done.or(failed)).toBeVisible({ timeout: 12 * 60_000 })
-  if (await failed.isVisible()) {
-    const errors = await page.locator('li p.text-\\[11px\\]').allInnerTexts()
-    throw new Error(`La subida falló en el sitio publicado: ${[...new Set(errors)].join(' | ')}`)
+  await expect(page.getByText(/Subiendo \d+ de \d+/).first()).toBeVisible()
+  // Sale a ver el álbum mientras sube: la mini barra sigue mostrando el avance
+  await page.getByRole('link', { name: 'Inicio del álbum de Sofi' }).click()
+  await page.waitForURL(/\/$/)
+  const dock = page.getByRole('region', { name: 'Subida en curso' })
+  await expect(dock).toBeVisible()
+  await expect(dock).toContainText(/¡Listo!|no se pud/, { timeout: 12 * 60_000 })
+  if (!(await dock.textContent())?.includes('¡Listo!')) {
+    await dock.getByRole('button', { name: 'Ver archivos en subida' }).click()
+    throw new Error(`La subida falló en el sitio publicado: ${await dock.innerText()}`)
   }
-  await expect(page.getByText(`Tus ${FILES.length} recuerdos ya están en el álbum de Sofi.`)).toBeVisible()
+  await expect(dock).toContainText(`¡Listo! Tus ${FILES.length} recuerdos ya están en el álbum.`)
 
   await page.goto('/mis-recuerdos')
   await expect(page.getByRole('button', { name: new RegExp(`^Abrir (foto|video) de ${NOMBRE}$`) })).toHaveCount(FILES.length, { timeout: 30_000 })
