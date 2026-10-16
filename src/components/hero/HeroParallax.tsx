@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type CSSProperties } from 'react'
-import { HERO_LAYERS, layerOffset, scrollTimelineVars, smoothToward } from '@/features/gallery/parallax'
+import { HERO_LAYERS, heroScrollY, layerOffset, scrollTimelineVars, smoothToward } from '@/features/gallery/parallax'
 import { useScrollTimeline } from '@/hooks/useScrollTimeline'
 
 interface Placement {
@@ -156,10 +156,13 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
       return
     }
     const pointer = { x: 0, y: 0 }
-    const current = new Map<string, { x: number; y: number }>()
+    const depthOf = new Map<string, { x: number; y: number }>()
     let frame = 0
     let last = 0
-    // Un solo bucle: se mueve hacia el objetivo con suavizado y se detiene cuando todo llegó
+    let appliedY = -1
+    let settled = false
+    // Un solo bucle. El scroll se aplica directo, sin suavizado: al soltar el dedo no queda nada por acomodar.
+    // Solo la profundidad con el mouse se suaviza
     const tick = (now: number) => {
       frame = 0
       const dt = Math.min(64, now - (last || now - 16))
@@ -167,21 +170,25 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
       const y = window.scrollY
       // La invitación a deslizar se desvanece apenas la persona empieza a bajar
       if (cue.current) cue.current.style.opacity = String(Math.max(0, 1 - y / 140))
-      if (y > (root.current?.offsetHeight ?? 1000) * 1.2) return
+      const sy = cssScroll ? 0 : heroScrollY(y, SCROLL_RANGE)
+      if (sy === appliedY && settled) return
       let moving = false
       for (const layer of HERO_LAYERS) {
         const el = layers.current.get(layer.id)
         if (!el) continue
         // Profundidad: lo que está más al frente se mueve más con el mouse
         const depth = layer.speed - 0.15
-        const tx = (cssScroll ? 0 : y * (layer.drift ?? 0)) + pointer.x * depth * 16
-        const ty = (cssScroll ? 0 : layerOffset(y, layer.speed)) + pointer.y * depth * 10
-        const prev = current.get(layer.id) ?? { x: tx, y: ty }
-        const next = { x: smoothToward(prev.x, tx, dt, HALF_LIFE_MS), y: smoothToward(prev.y, ty, dt, HALF_LIFE_MS) }
-        current.set(layer.id, next)
-        if (next.x !== tx || next.y !== ty) moving = true
-        el.style.transform = `translate3d(${next.x.toFixed(2)}px, ${next.y.toFixed(2)}px, 0)`
+        const target = { x: pointer.x * depth * 16, y: pointer.y * depth * 10 }
+        const prev = depthOf.get(layer.id) ?? target
+        const next = { x: smoothToward(prev.x, target.x, dt, HALF_LIFE_MS), y: smoothToward(prev.y, target.y, dt, HALF_LIFE_MS) }
+        depthOf.set(layer.id, next)
+        if (next.x !== target.x || next.y !== target.y) moving = true
+        const tx = sy * (layer.drift ?? 0) + next.x
+        const ty = layerOffset(sy, layer.speed) + next.y
+        el.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`
       }
+      appliedY = sy
+      settled = !moving
       if (moving) frame = requestAnimationFrame(tick)
     }
     const kick = () => {
@@ -192,11 +199,13 @@ export function HeroParallax({ reducedMotion }: { reducedMotion: boolean }) {
       if (!r) return
       pointer.x = ((e.clientX - r.left) / r.width - 0.5) * 2
       pointer.y = ((e.clientY - r.top) / r.height - 0.5) * 2
+      settled = false
       kick()
     }
     const onLeave = () => {
       pointer.x = 0
       pointer.y = 0
+      settled = false
       kick()
     }
     const finePointer = window.matchMedia?.('(pointer: fine)').matches

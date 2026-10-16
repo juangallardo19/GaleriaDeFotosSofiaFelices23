@@ -7,8 +7,10 @@ export default defineConfig({
   timeout: 30_000,
   use: { baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`, trace: 'retain-on-failure' },
   projects: [
-    { name: 'celular', use: { ...devices['Pixel 7'] } },
-    { name: 'escritorio', use: { ...devices['Desktop Chrome'] } },
+    { name: 'celular', use: { ...devices['Pixel 7'] }, testIgnore: /parallax-safari/ },
+    { name: 'escritorio', use: { ...devices['Desktop Chrome'] }, testIgnore: /parallax-safari/ },
+    // Motor de Safari (requiere: npx playwright install webkit)
+    { name: 'iphone-safari', use: { ...devices['iPhone 15'] }, testMatch: /parallax-safari/ },
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined

@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { cardRatio } from '@/features/gallery/gallery-state'
 import { columnsForWidth, distribute } from '@/features/gallery/masonry'
-import { cardAmplitude, cardOffset, columnFactors, smoothToward } from '@/features/gallery/parallax'
+import { cardAmplitude, cardOffset, columnFactors } from '@/features/gallery/parallax'
 import { useScrollTimeline } from '@/hooks/useScrollTimeline'
 
 interface Sized {
@@ -44,32 +44,26 @@ export function MasonryGrid<T extends Sized>({ items, renderItem, reducedMotion,
     return () => ro.disconnect()
   }, [])
 
-  // Plan B sin animaciones de scroll en CSS: cada card se acerca a su posición con suavizado
+  // Plan B sin animaciones de scroll en CSS (Safari): la posición sale directo del scroll, sin suavizado,
+  // para que al soltar el dedo cada card ya esté en su lugar
   useEffect(() => {
     if (reducedMotion || cssScroll) {
       cards.current.forEach(({ el }) => (el.style.transform = ''))
       return
     }
-    const current = new Map<string, number>()
+    const applied = new Map<string, string>()
     let frame = 0
-    let last = 0
-    const tick = (now: number) => {
+    const tick = () => {
       frame = 0
-      const dt = Math.min(64, now - (last || now - 16))
-      last = now
-      const vh = window.innerHeight
-      let moving = false
+      // Altura estable: en iPhone innerHeight cambia cuando la barra de Safari aparece o se esconde
+      const vh = document.documentElement.clientHeight
       cards.current.forEach(({ el, k }, id) => {
         const r = el.parentElement!.getBoundingClientRect()
-        const target = cardOffset({ centerY: r.top + r.height / 2, viewportH: vh, k })
-        const prev = current.get(id)
-        // Fuera de pantalla se acomoda de una para que al entrar no salte
-        const next = prev === undefined || r.bottom < -300 || r.top > vh + 300 ? target : smoothToward(prev, target, dt, 70)
-        current.set(id, next)
-        if (next !== target) moving = true
-        el.style.transform = `translate3d(0, ${next.toFixed(2)}px, 0)`
+        const ty = cardOffset({ centerY: r.top + r.height / 2, viewportH: vh, k }).toFixed(2)
+        if (applied.get(id) === ty) return
+        applied.set(id, ty)
+        el.style.transform = `translate3d(0, ${ty}px, 0)`
       })
-      if (moving) frame = requestAnimationFrame(tick)
     }
     const kick = () => {
       if (!frame) frame = requestAnimationFrame(tick)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { BACKGROUND_CATS_SPEED, smoothToward } from '@/features/gallery/parallax'
+import { BACKGROUND_CATS_SPEED } from '@/features/gallery/parallax'
 import { useScrollTimeline } from '@/hooks/useScrollTimeline'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
@@ -39,34 +39,29 @@ export function BackgroundCats() {
     return () => ro.disconnect()
   }, [])
 
-  // Plan B sin animaciones de scroll en CSS: suavizado para que no salten con un scroll rápido
+  // Plan B sin animaciones de scroll en CSS (Safari): la posición sale directo del scroll, sin suavizado,
+  // para que al soltar el dedo los gatos no se sigan moviendo
   useEffect(() => {
     if (reducedMotion || cssScroll) {
       refs.current.forEach((el, i) => el && (el.style.transform = `rotate(${CATS[i % CATS.length].rot}deg)`))
       return
     }
-    const current = new Map<number, number>()
+    const applied = new Map<number, string>()
     let frame = 0
-    let last = 0
-    const tick = (now: number) => {
+    const tick = () => {
       frame = 0
-      const dt = Math.min(64, now - (last || now - 16))
-      last = now
-      const vh = window.innerHeight
-      let moving = false
+      // Altura estable: en iPhone innerHeight cambia cuando la barra de Safari aparece o se esconde
+      const vh = document.documentElement.clientHeight
       refs.current.forEach((el, i) => {
         if (!el?.parentElement) return
         const cat = CATS[i % CATS.length]
         const r = el.parentElement.getBoundingClientRect()
         // Más lenta que la página: se queda atrás mientras el contenido sube
-        const target = (vh / 2 - (r.top + r.height / 2)) * (1 - cat.speed)
-        const prev = current.get(i)
-        const next = prev === undefined || r.bottom < -400 || r.top > vh + 400 ? target : smoothToward(prev, target, dt, 90)
-        current.set(i, next)
-        if (next !== target) moving = true
-        el.style.transform = `translate3d(0, ${next.toFixed(2)}px, 0) rotate(${cat.rot}deg)`
+        const ty = ((vh / 2 - (r.top + r.height / 2)) * (1 - cat.speed)).toFixed(2)
+        if (applied.get(i) === ty) return
+        applied.set(i, ty)
+        el.style.transform = `translate3d(0, ${ty}px, 0) rotate(${cat.rot}deg)`
       })
-      if (moving) frame = requestAnimationFrame(tick)
     }
     const kick = () => {
       if (!frame) frame = requestAnimationFrame(tick)

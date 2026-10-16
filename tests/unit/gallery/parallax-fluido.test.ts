@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CARD_OFFSET_CLAMP, HERO_LAYERS, cardAmplitude, layerOffset, scrollTimelineVars, smoothToward } from '@/features/gallery/parallax'
+import { CARD_OFFSET_CLAMP, HERO_LAYERS, cardAmplitude, heroScrollY, layerOffset, scrollTimelineReliable, scrollTimelineVars, smoothToward } from '@/features/gallery/parallax'
 
 describe('Parallax fluido con scroll rápido', () => {
   it('el suavizado avanza hacia el objetivo sin saltar de una', () => {
@@ -35,5 +35,22 @@ describe('Parallax fluido con scroll rápido', () => {
     expect(cardAmplitude(0.15, 800, 300)).toBe(CARD_OFFSET_CLAMP)
     expect(cardAmplitude(0.05, 800, 300)).toBeCloseTo(27.5, 5)
     expect(cardAmplitude(0, 800, 300)).toBe(0)
+  })
+})
+
+describe('Parallax en Safari (iPhone)', () => {
+  it('usa las animaciones de scroll de CSS solo donde funcionan bien (Chrome, Android)', () => {
+    expect(scrollTimelineReliable({ supported: true, vendor: 'Google Inc.' })).toBe(true)
+    expect(scrollTimelineReliable({ supported: false, vendor: 'Google Inc.' })).toBe(false)
+  })
+
+  it('en Safari y en los navegadores de iPhone mueve las capas con JavaScript, porque Safari las desincroniza al soltar el dedo', () => {
+    expect(scrollTimelineReliable({ supported: true, vendor: 'Apple Computer, Inc.' })).toBe(false)
+  })
+
+  it('más allá de la portada las capas quedan en su posición final, no congeladas a medio camino', () => {
+    expect(heroScrollY(300, 1200)).toBe(300)
+    expect(heroScrollY(5000, 1200)).toBe(1200)
+    expect(heroScrollY(-40, 1200)).toBe(0)
   })
 })

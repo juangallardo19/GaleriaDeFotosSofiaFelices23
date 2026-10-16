@@ -68,6 +68,19 @@ export function cardAmplitude(k: number, viewportH: number, cardH: number): numb
   return Math.min(CARD_OFFSET_CLAMP, (viewportH / 2 + cardH / 2) * k)
 }
 
+// Safari (y todo navegador de iPhone, que usa su motor) desincroniza estas animaciones al soltar el dedo:
+// las capas saltan a otra posición, así que ahí se mueven con JavaScript
+export function scrollTimelineReliable({ supported, vendor }: { supported: boolean; vendor: string }): boolean {
+  return supported && !vendor.startsWith('Apple')
+}
+
 export function supportsScrollTimeline(): boolean {
-  return typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('animation-timeline: scroll()')
+  const supported = typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('animation-timeline: scroll()')
+  return scrollTimelineReliable({ supported, vendor: typeof navigator === 'undefined' ? '' : navigator.vendor })
+}
+
+// Scroll que mueve la portada: sin valores negativos del rebote de iPhone y con tope, para que las capas queden en su
+// posición final y no congeladas a medio camino tras un scroll rápido
+export function heroScrollY(scrollY: number, limit: number): number {
+  return Math.min(Math.max(0, scrollY), limit)
 }
