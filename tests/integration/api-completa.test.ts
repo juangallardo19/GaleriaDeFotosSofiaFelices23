@@ -262,6 +262,12 @@ describe('RF-14 · admin de invitados', () => {
     expect(new TextDecoder().decode(bytes.slice(0, 5))).toBe('%PDF-')
   }, 20_000)
 
+  it('con ?ver=1 el PDF de tarjetas se abre en el navegador en vez de descargarse', async () => {
+    await app.guests.create('Para ver')
+    const res = await tarjetasPdf(req('/api/admin/cards?ver=1', {}, adminCookie))
+    expect(res.headers.get('content-disposition')).toMatch(/^inline;/)
+  }, 20_000)
+
   it('muestra estadísticas: invitados, en línea, recuerdos y almacenamiento', async () => {
     await registrar()
     const res = await estadisticas(req('/api/admin/stats', {}, adminCookie))

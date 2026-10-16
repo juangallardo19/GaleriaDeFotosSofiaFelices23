@@ -7,7 +7,7 @@ import { GuestBody } from '@/server/validation'
 export const GET = route(async (req, app) => {
   await requireAdmin(req, app)
   const [guests, uploads] = await Promise.all([app.guests.list(), app.media.uploadsByGuest()])
-  const now = new Date()
+  const now = app.now()
   return NextResponse.json({
     items: guests.map((g) => ({
       id: g.id,

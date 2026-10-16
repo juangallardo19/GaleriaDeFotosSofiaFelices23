@@ -12,6 +12,10 @@ export const GET = route(async (req, app) => {
     art: await app.cardArt?.().catch(() => undefined),
   })
   return new Response(bytes.slice().buffer, {
-    headers: { 'content-type': 'application/pdf', 'content-disposition': 'attachment; filename="tarjetas-sofi-23.pdf"' },
+    // Con ?ver=1 se abre en el navegador para revisarla antes de imprimir
+    headers: {
+      'content-type': 'application/pdf',
+      'content-disposition': `${req.nextUrl.searchParams.get('ver') === '1' ? 'inline' : 'attachment'}; filename="tarjetas-sofi-23.pdf"`,
+    },
   })
 })

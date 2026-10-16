@@ -1,3 +1,4 @@
+import { fetchCardArt } from '@/features/admin/card-art'
 import { SlidingWindowLimiter } from '@/features/auth/rate-limit'
 import { ConsoleMailer, type Mailer } from './mail/types'
 import {
@@ -33,6 +34,8 @@ export interface AppContainer {
   storage: StorageProvider
   thumbs: ThumbStore
   adminLimiter: SlidingWindowLimiter
+  // Reloj de la app: en producción es la hora real; en las pruebas, uno controlado
+  now: () => Date
   cardArt?: () => Promise<CardArt>
 }
 
@@ -61,6 +64,7 @@ export function buildContainer(opts: BuildOptions & { repos: Repos }): AppContai
     guests: createGuestService({ guests: repos.guests, baseUrl: config.baseUrl, now }),
     media: createMediaService({ ...repos, storage, thumbs, mailer, alertEmail: config.alertEmail, now }),
     adminLimiter: new SlidingWindowLimiter({ limit: config.adminLoginLimit ?? 5, windowMs: 60_000 }),
+    now: now ?? (() => new Date()),
   }
 }
 
@@ -108,7 +112,10 @@ async function createDefaultContainer(): Promise<AppContainer> {
     if (process.env.DEMO_MEDIA === '1') await (await import('./dev-seed')).seedDemo(repos, marta.id)
   }
   const thumbs = process.env.BLOB_READ_WRITE_TOKEN ? new BlobThumbStore({ access: blobAccess(process.env.BLOB_ACCESS) }) : new MemoryThumbStore()
-  return buildContainer({ repos, storage: new DevStorage(), thumbs, mailer: new ConsoleMailer(), config })
+  const container = buildContainer({ repos, storage: new DevStorage(), thumbs, mailer: new ConsoleMailer(), config })
+  // También en local la tarjeta sale con las fuentes y adornos del álbum
+  container.cardArt = () => fetchCardArt(config.baseUrl)
+  return container
 }
 
 const globalForContainer = globalThis as unknown as { __sofiContainer?: Promise<AppContainer> }

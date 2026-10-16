@@ -1,4 +1,4 @@
-import type { CardArt } from '@/features/admin/cards-pdf'
+import { fetchCardArt } from '@/features/admin/card-art'
 import { buildContainer, type AppConfig, type AppContainer } from './container'
 import { envValue } from './env'
 import { GoogleAuth } from './google/auth'
@@ -27,9 +27,6 @@ export async function createProductionContainer(config: AppConfig): Promise<AppC
     mailer: envValue('GMAIL_SENDER') ? new GmailMailer({ auth, from: envValue('GMAIL_SENDER')! }) : new ConsoleMailer(),
     config,
   })
-  container.cardArt = async (): Promise<CardArt> => {
-    const res = await fetch(new URL('/assets/banderines.png', config.baseUrl))
-    return res.ok ? { banderines: new Uint8Array(await res.arrayBuffer()) } : {}
-  }
+  container.cardArt = () => fetchCardArt(config.baseUrl)
   return container
 }
