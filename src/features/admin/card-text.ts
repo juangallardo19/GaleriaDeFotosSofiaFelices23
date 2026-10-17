@@ -3,3 +3,7 @@ export const CARD_MESSAGE = 'Gracias por acompañarnos en este día tan especial
 export const CARD_QR_TITLE = 'ESCANEA TU QR'
 export const CARD_QR_LINES = ['para subir tus fotos', 'y videos, y revivir', 'los mejores momentos', 'de la fiesta.']
 export const CARD_SIGNATURE = 'CON CARIÑO,'
+
+// Tarjeta de capitanes de mesa (para colgar de la botella)
+export const CAPTAIN_TABLE = 'DE MESA'
+export const CAPTAIN_SHOTS = '¡Shots!'

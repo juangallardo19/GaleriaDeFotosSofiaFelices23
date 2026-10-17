@@ -3,6 +3,9 @@ import { expect, test, type Page } from '@playwright/test'
 // Corre con el motor de Safari en un iPhone (proyecto "iphone-safari"). La portada usa la animación ligada al scroll con
 // valores fijos por capa (la variante B, elegida probando en un iPhone real): fluida y sin saltos al soltar el dedo
 
+// WebKit en Windows es lento: cada prueba tarda cerca de 25 s y con el servidor ocupado pasaba del límite de 30 s
+test.setTimeout(60_000)
+
 const frames = (page: Page, n: number) =>
   page.evaluate(
     (n) =>

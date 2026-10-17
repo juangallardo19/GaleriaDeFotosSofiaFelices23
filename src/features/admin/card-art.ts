@@ -1,4 +1,4 @@
-import type { CardArt } from './cards-pdf'
+import type { CardArt } from './card-pen'
 
 export const CARD_ART_FILES = {
   script: 'pinyon-script.ttf',
@@ -8,6 +8,8 @@ export const CARD_ART_FILES = {
   estrella: 'estrella.png',
   globoRosa: 'globo-rosa.png',
   globoNaranja: 'globo-naranja.png',
+  bolaDisco: 'bola-disco.png',
+  shots: 'shots.png',
 } as const satisfies Record<keyof CardArt, string>
 
 // Las fuentes y adornos viven en public/assets/tarjeta; se piden por HTTP porque en Vercel public no está dentro de la función

@@ -17,6 +17,8 @@ import { GET as listarInvitados, POST as crearInvitado } from '@/app/api/admin/g
 import { DELETE as borrarInvitado } from '@/app/api/admin/guests/[id]/route'
 import { POST as importarInvitados } from '@/app/api/admin/guests/import/route'
 import { GET as tarjetasPdf } from '@/app/api/admin/cards/route'
+import { GET as listarCapitanes, PUT as guardarCapitanes } from '@/app/api/admin/capitanes/route'
+import { GET as tarjetasCapitanes } from '@/app/api/admin/capitanes/tarjetas/route'
 import { GET as estadisticas } from '@/app/api/admin/stats/route'
 import { ADMIN_COOKIE, GUEST_COOKIE } from '@/features/auth/session'
 import { TEST_ADMIN_PASSWORD, installTestContainer } from '../helpers/container'
@@ -278,5 +280,44 @@ describe('RF-14 · admin de invitados', () => {
     const res = await logoutAdmin(req('/api/admin/logout', { method: 'POST' }, adminCookie))
     expect(res.status).toBe(204)
     expect(res.headers.getSetCookie().find((c) => c.startsWith(`${ADMIN_COOKIE}=`))).toMatch(/Max-Age=0/)
+  })
+})
+
+describe('Capitanes de mesa (admin)', () => {
+  it('solo el admin ve y cambia la lista', async () => {
+    expect((await listarCapitanes(req('/api/admin/capitanes', {}, guestCookie))).status).toBe(403)
+    expect((await guardarCapitanes(req('/api/admin/capitanes', json({ items: [] }, 'PUT'), guestCookie))).status).toBe(403)
+  })
+
+  it('guarda la lista y la devuelve igual', async () => {
+    const res = await guardarCapitanes(req('/api/admin/capitanes', json({ items: [{ name: 'Juliana', title: 'capitana' }] }, 'PUT'), adminCookie))
+    expect(res.status).toBe(200)
+    const { items } = await res.json()
+    expect(items).toEqual([{ id: expect.any(String), name: 'Juliana', title: 'capitana' }])
+    expect((await (await listarCapitanes(req('/api/admin/capitanes', {}, adminCookie))).json()).items).toEqual(items)
+  })
+
+  it('acepta capitanes en plural para una misma mesa', async () => {
+    const res = await guardarCapitanes(req('/api/admin/capitanes', json({ items: [{ name: 'Juliana y Andrés', title: 'capitanes' }] }, 'PUT'), adminCookie))
+    expect(res.status).toBe(200)
+  })
+
+  it('rechaza un título que no sea capitán o capitana', async () => {
+    const res = await guardarCapitanes(req('/api/admin/capitanes', json({ items: [{ name: 'Juliana', title: 'pirata' }] }, 'PUT'), adminCookie))
+    expect(res.status).toBe(400)
+  })
+
+  it('genera el PDF de las tarjetas de capitanes y se puede abrir en el navegador', async () => {
+    await guardarCapitanes(req('/api/admin/capitanes', json({ items: [{ name: 'Juliana', title: 'capitana' }, { name: 'Andrés', title: 'capitan' }] }, 'PUT'), adminCookie))
+    const res = await tarjetasCapitanes(req('/api/admin/capitanes/tarjetas?ver=1', {}, adminCookie))
+    expect(res.headers.get('content-type')).toBe('application/pdf')
+    expect(res.headers.get('content-disposition')).toBe('inline; filename="capitanes-de-mesa.pdf"')
+    expect(new TextDecoder().decode(new Uint8Array(await res.arrayBuffer()).slice(0, 5))).toBe('%PDF-')
+  }, 20_000)
+
+  it('sin capitanes avisa en vez de generar un PDF vacío', async () => {
+    const res = await tarjetasCapitanes(req('/api/admin/capitanes/tarjetas', {}, adminCookie))
+    expect(res.status).toBe(400)
+    expect((await res.json()).message).toMatch(/Agrega al menos un capitán/)
   })
 })

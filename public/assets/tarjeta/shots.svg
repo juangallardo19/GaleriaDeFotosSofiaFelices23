@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 220">
+  <g transform="translate(26 64) rotate(15 40 120)">
+    <path d="M6 18 L74 18 L64 128 Q63 136 55 136 L25 136 Q17 136 16 128 Z" fill="#FFFFFF" fill-opacity="0.85" stroke="#5A1238" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M12 56 L68 56 L62 124 Q61 130 55 130 L25 130 Q19 130 18 124 Z" fill="#E6157A"/>
+    <path d="M12 56 Q40 64 68 56" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="3"/>
+    <path d="M18 112 L22 126" stroke="#5A1238" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round"/>
+    <path d="M17 30 L20 104" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+    <path d="M6 18 L74 18" stroke="#5A1238" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(134 64) rotate(-15 40 120)">
+    <path d="M6 18 L74 18 L64 128 Q63 136 55 136 L25 136 Q17 136 16 128 Z" fill="#FFFFFF" fill-opacity="0.85" stroke="#5A1238" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M12 56 L68 56 L62 124 Q61 130 55 130 L25 130 Q19 130 18 124 Z" fill="#FF8A1F"/>
+    <path d="M12 56 Q40 64 68 56" fill="none" stroke="#FFFFFF" stroke-opacity="0.7" stroke-width="3"/>
+    <path d="M18 112 L22 126" stroke="#5A1238" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round"/>
+    <path d="M17 30 L20 104" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-opacity="0.9"/>
+    <path d="M6 18 L74 18" stroke="#5A1238" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <path transform="translate(104 44) rotate(-24) scale(1)" d="M0-12C5-4 7 1 7 4A7 7 0 0 1-7 4C-7 1-5-4 0-12z" fill="#E6157A"/><path transform="translate(122 26) rotate(6) scale(1.2)" d="M0-12C5-4 7 1 7 4A7 7 0 0 1-7 4C-7 1-5-4 0-12z" fill="#FF8A1F"/><path transform="translate(140 46) rotate(30) scale(0.8)" d="M0-12C5-4 7 1 7 4A7 7 0 0 1-7 4C-7 1-5-4 0-12z" fill="#E6157A"/><path transform="translate(88 22) rotate(-40) scale(0.7)" d="M0-12C5-4 7 1 7 4A7 7 0 0 1-7 4C-7 1-5-4 0-12z" fill="#FF8A1F"/>
+  <path transform="translate(54 40) scale(1.3)" d="M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10z" fill="#FF8A1F"/><path transform="translate(190 36) scale(1.1)" d="M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10z" fill="#E6157A"/><path transform="translate(222 120) scale(0.8)" d="M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10z" fill="#FF8A1F"/><path transform="translate(16 128) scale(0.8)" d="M0-10C1-3 3-1 10 0 3 1 1 3 0 10-1 3-3 1-10 0-3-1-1-3 0-10z" fill="#E6157A"/>
+</svg>

@@ -1,4 +1,5 @@
 import { fetchCardArt } from '@/features/admin/card-art'
+import { createCaptainService, type CaptainService } from './services/captain-service'
 import { SlidingWindowLimiter } from '@/features/auth/rate-limit'
 import { ConsoleMailer, type Mailer } from './mail/types'
 import {
@@ -15,7 +16,7 @@ import { envValue } from './env'
 import { DevStorage } from './storage/dev'
 import { BlobThumbStore, MemoryThumbStore, blobAccess, type ThumbStore } from './storage/thumbs'
 import type { StorageProvider } from './storage/types'
-import type { CardArt } from '@/features/admin/cards-pdf'
+import type { CardArt } from '@/features/admin/card-pen'
 
 export interface AppConfig {
   sessionSecret: string
@@ -30,6 +31,7 @@ export interface AppConfig {
 export interface AppContainer {
   config: AppConfig
   guests: GuestService
+  captains: CaptainService
   media: MediaService
   storage: StorageProvider
   thumbs: ThumbStore
@@ -62,6 +64,7 @@ export function buildContainer(opts: BuildOptions & { repos: Repos }): AppContai
     storage,
     thumbs,
     guests: createGuestService({ guests: repos.guests, baseUrl: config.baseUrl, now }),
+    captains: createCaptainService({ settings: repos.settings }),
     media: createMediaService({ ...repos, storage, thumbs, mailer, alertEmail: config.alertEmail, now }),
     adminLimiter: new SlidingWindowLimiter({ limit: config.adminLoginLimit ?? 5, windowMs: 60_000 }),
     now: now ?? (() => new Date()),

@@ -11,6 +11,7 @@ const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: '/admin/invitados', label: 'Invitados', icon: 'users' },
   { href: '/admin/contenido', label: 'Contenido', icon: 'grid' },
   { href: '/admin/tarjetas', label: 'Tarjetas QR', icon: 'printer' },
+  { href: '/admin/capitanes', label: 'Capitanes de mesa', icon: 'shot' },
   { href: '/', label: 'Ver el álbum', icon: 'link' },
 ]
 

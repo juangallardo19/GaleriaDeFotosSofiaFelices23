@@ -35,3 +35,9 @@ export const HiddenBody = z.object({ hidden: z.boolean() })
 export const IdsBody = z.object({ ids: z.array(z.string().min(1).max(100)).min(1).max(100) })
 export const HiddenManyBody = IdsBody.extend({ hidden: z.boolean() })
 export const GuestBody = z.object({ name: z.string().min(1).max(200) })
+
+export const CaptainsBody = z.object({
+  items: z
+    .array(z.object({ id: z.string().min(1).max(64).optional(), name: z.string().min(1).max(200), title: z.enum(['capitan', 'capitana', 'capitanes', 'capitanas']) }))
+    .max(100),
+})
