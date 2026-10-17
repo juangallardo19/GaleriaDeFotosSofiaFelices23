@@ -123,6 +123,13 @@ describe.each(implementations)('Contrato de repositorios (%s)', { timeout: 30_00
     expect(await r.media.findById('a')).toBeNull()
   })
 
+  it('medios: cambiar la vista previa de un video', async () => {
+    const g = await r.guests.create({ name: 'A', token: 'A'.repeat(22) })
+    await r.media.insert(media('v', g.id, { kind: 'video', thumbUrl: '/assets/placeholder-video.webp', width: 4, height: 5, durationSec: null }))
+    await r.media.updateVisuals('v', { thumbUrl: '/api/miniaturas/thumbs/nueva.png', width: 720, height: 1280, durationSec: 47 })
+    expect(await r.media.findById('v')).toMatchObject({ thumbUrl: '/api/miniaturas/thumbs/nueva.png', width: 720, height: 1280, durationSec: 47 })
+  })
+
   it('likes: alternar y listar los míos', async () => {
     expect(await r.likes.toggle('g1', 'm1')).toBe(true)
     expect(await r.likes.toggle('g1', 'm2')).toBe(true)

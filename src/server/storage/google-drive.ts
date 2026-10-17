@@ -1,6 +1,6 @@
 import { AppError } from '../errors'
 import type { GoogleAuth } from '../google/auth'
-import type { FolderLinks, StorageFolder, StorageProvider } from './types'
+import type { FolderLinks, StorageFolder, StorageProvider, VideoThumbnail } from './types'
 
 export const ROOT_FOLDER_NAME = 'Álbum Sofi 23'
 const API = 'https://www.googleapis.com/drive/v3'
@@ -105,6 +105,23 @@ export class GoogleDriveStorage implements StorageProvider {
 
   streamUrl(fileId: string) {
     return `${API}/files/${fileId}?alt=media&key=${this.opts.apiKey}`
+  }
+
+  // Drive genera la miniatura de cualquier video, también de los MOV del iPhone, unos minutos después de subirlo.
+  // El enlace viene pequeño (=s220): se pide más grande, y como el archivo es privado se baja con el token
+  async videoThumbnail(fileId: string): Promise<VideoThumbnail | null> {
+    const res = await this.request(`${API}/files/${fileId}?fields=thumbnailLink,videoMediaMetadata(durationMillis)`)
+    if (!res.ok) throw new AppError('servicio', `Drive no devolvió el video (${res.status})`)
+    const file = (await res.json()) as { thumbnailLink?: string; videoMediaMetadata?: { durationMillis?: string } }
+    if (!file.thumbnailLink) return null
+    const thumb = await this.request(file.thumbnailLink.replace(/=s\d+$/, '=s720'))
+    if (!thumb.ok) return null
+    const millis = Number(file.videoMediaMetadata?.durationMillis)
+    return {
+      image: new Uint8Array(await thumb.arrayBuffer()),
+      contentType: thumb.headers.get('content-type') ?? 'image/jpeg',
+      durationSec: Number.isFinite(millis) && millis > 0 ? Math.round(millis / 1000) : null,
+    }
   }
 
   async remove(fileId: string) {

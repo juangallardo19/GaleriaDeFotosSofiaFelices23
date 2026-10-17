@@ -121,9 +121,25 @@ export function ContentScreen() {
 
   useEffect(() => {
     if (!notice) return
-    const t = setTimeout(() => setNotice(null), 4000)
+    const t = setTimeout(() => setNotice(null), 6000)
     return () => clearTimeout(t)
   }, [notice])
+
+  // Los videos del iPhone pueden quedar sin vista previa: se usa la miniatura que Drive genera unos minutos después
+  async function refreshVideoThumbs() {
+    setBusy('vistas')
+    try {
+      const { updated, pending } = await postJson<{ updated: number; pending: number }>('/api/admin/media/vistas-previas', {})
+      const done = updated === 1 ? '1 video con vista previa nueva.' : `${updated} videos con vista previa nueva.`
+      const waiting = pending === 1 ? ' 1 sigue procesándose en Drive: intenta en unos minutos.' : ` ${pending} siguen procesándose en Drive: intenta en unos minutos.`
+      setNotice(updated === 0 && pending === 0 ? 'Todos los videos ya tienen vista previa.' : `${done}${pending ? waiting : ''}`)
+      if (updated) load(null)
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'No se pudieron crear las vistas previas')
+    } finally {
+      setBusy(null)
+    }
+  }
 
   const visible = onlyHidden ? items.filter((m) => m.hidden) : items
   const hiddenCount = items.filter((m) => m.hidden).length
@@ -144,12 +160,18 @@ export function ContentScreen() {
       title="Contenido"
       subtitle={`${items.length}${cursor ? '+' : ''} recuerdos · ${hiddenCount} ocultos`}
       actions={
-        folder && (
-          <a href={folder} target="_blank" rel="noopener noreferrer" className={buttonClass('secondary')}>
-            <Icon name="folder" size={18} strokeWidth={2} />
-            Abrir carpeta en Drive
-          </a>
-        )
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => void refreshVideoThumbs()} disabled={busy !== null} className={buttonClass('secondary')}>
+            <Icon name="play" size={18} strokeWidth={2} />
+            Vistas previas de videos
+          </button>
+          {folder && (
+            <a href={folder} target="_blank" rel="noopener noreferrer" className={buttonClass('secondary')}>
+              <Icon name="folder" size={18} strokeWidth={2} />
+              Abrir carpeta en Drive
+            </a>
+          )}
+        </div>
       }
     >
       <div className="flex flex-wrap gap-2">

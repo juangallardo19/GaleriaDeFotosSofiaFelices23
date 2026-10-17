@@ -67,31 +67,53 @@ async function imageFrame(file: File): Promise<Frame> {
   return { source: img, width: img.naturalWidth, height: img.naturalHeight, durationSec: null, dispose: () => URL.revokeObjectURL(url) }
 }
 
-function waitFor(el: HTMLMediaElement, event: string) {
+function waitFor(el: HTMLMediaElement, event: string, timeoutMs: number) {
   return new Promise<void>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('El video tardó demasiado en abrir')), VIDEO_TIMEOUT_MS)
+    const timer = setTimeout(() => reject(new Error('El video tardó demasiado en abrir')), timeoutMs)
     el.addEventListener(event, () => (clearTimeout(timer), resolve()), { once: true })
     el.addEventListener('error', () => (clearTimeout(timer), reject(new Error('El navegador no puede abrir este video'))), { once: true })
   })
 }
 
-async function videoFrame(file: File): Promise<Frame> {
+const HAVE_CURRENT_DATA = 2
+
+export async function videoFrame(file: File, opts: { createVideo?: () => HTMLVideoElement; timeoutMs?: number } = {}): Promise<Frame> {
+  const timeoutMs = opts.timeoutMs ?? VIDEO_TIMEOUT_MS
   const url = URL.createObjectURL(file)
-  const video = document.createElement('video')
+  const video = opts.createVideo?.() ?? document.createElement('video')
   video.muted = true
+  video.defaultMuted = true
   video.playsInline = true
+  video.setAttribute('muted', '')
+  video.setAttribute('playsinline', '')
   video.preload = 'auto'
+  // Safari en iPhone decodifica mejor un video que está en la página: se agrega invisible mientras se saca el cuadro
+  const attached = typeof Node !== 'undefined' && video instanceof Node
+  if (attached) {
+    video.style.cssText = 'position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none'
+    document.body.appendChild(video)
+  }
   video.src = url
   const dispose = () => {
+    video.pause()
     video.removeAttribute('src')
     video.load()
+    if (attached) video.remove()
     URL.revokeObjectURL(url)
   }
   try {
-    await waitFor(video, 'loadeddata')
+    await waitFor(video, 'loadedmetadata', timeoutMs)
     const duration = Number.isFinite(video.duration) ? video.duration : null
-    video.currentTime = Math.min(1, (duration ?? 0) / 3)
-    await waitFor(video, 'seeked')
+    // En iPhone, Safari no carga ningún cuadro hasta que el video se reproduce: se reproduce un instante en silencio
+    if (video.readyState < HAVE_CURRENT_DATA) {
+      const loaded = waitFor(video, 'loadeddata', timeoutMs)
+      await video.play().catch(() => {})
+      await loaded
+      video.pause()
+    }
+    const seeked = waitFor(video, 'seeked', timeoutMs)
+    video.currentTime = Math.max(0.1, Math.min(1, (duration ?? 0) / 3))
+    await seeked
     if (!video.videoWidth) throw new Error('El video no tiene imagen')
     return { source: video, width: video.videoWidth, height: video.videoHeight, durationSec: duration !== null ? Math.round(duration) : null, dispose }
   } catch (err) {

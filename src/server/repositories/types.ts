@@ -30,6 +30,7 @@ export interface MediaRepository {
   page(query: MediaPageQuery): Promise<{ items: Media[]; nextCursor: string | null }>
   newerThan(since: Date, includeHidden: boolean): Promise<Media[]>
   setHidden(id: string, hidden: boolean): Promise<void>
+  updateVisuals(id: string, visuals: Pick<Media, 'thumbUrl' | 'width' | 'height' | 'durationSec'>): Promise<void>
   increment(id: string, field: CounterField, by: number): Promise<number>
   remove(id: string): Promise<void>
   stats(): Promise<{ count: number; photos: number; videos: number; bytes: number; photoBytes: number }>

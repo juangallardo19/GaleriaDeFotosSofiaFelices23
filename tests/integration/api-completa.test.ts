@@ -19,6 +19,7 @@ import { POST as importarInvitados } from '@/app/api/admin/guests/import/route'
 import { GET as tarjetasPdf } from '@/app/api/admin/cards/route'
 import { GET as listarCapitanes, PUT as guardarCapitanes } from '@/app/api/admin/capitanes/route'
 import { GET as tarjetasCapitanes } from '@/app/api/admin/capitanes/tarjetas/route'
+import { POST as vistasPreviasVideos } from '@/app/api/admin/media/vistas-previas/route'
 import { GET as estadisticas } from '@/app/api/admin/stats/route'
 import { ADMIN_COOKIE, GUEST_COOKIE } from '@/features/auth/session'
 import { TEST_ADMIN_PASSWORD, installTestContainer } from '../helpers/container'
@@ -319,5 +320,17 @@ describe('Capitanes de mesa (admin)', () => {
     const res = await tarjetasCapitanes(req('/api/admin/capitanes/tarjetas', {}, adminCookie))
     expect(res.status).toBe(400)
     expect((await res.json()).message).toMatch(/Agrega al menos un capitán/)
+  })
+})
+
+describe('Vistas previas de videos desde Drive (admin)', () => {
+  it('solo el admin puede pedirlas', async () => {
+    expect((await vistasPreviasVideos(req('/api/admin/media/vistas-previas', json({}), guestCookie))).status).toBe(403)
+  })
+
+  it('responde cuántos videos se actualizaron y cuántos siguen pendientes', async () => {
+    const res = await vistasPreviasVideos(req('/api/admin/media/vistas-previas', json({}), adminCookie))
+    expect(res.status).toBe(200)
+    expect(await res.json()).toEqual({ updated: 0, pending: 0 })
   })
 })

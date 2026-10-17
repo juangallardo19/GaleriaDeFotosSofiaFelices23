@@ -1,12 +1,10 @@
 import type { MediaKind } from '@/features/media/media-kind'
 import { FALLBACK_COLOR } from '@/features/media/thumbnail'
+import { PLACEHOLDERS } from '@/features/media/placeholders'
 import { DriveUploadError } from './drive-upload'
 import type { Uploader, UploadTask } from './upload-queue'
 
-export const PLACEHOLDERS: Record<MediaKind, string> = {
-  photo: '/assets/placeholder-foto.webp',
-  video: '/assets/placeholder-video.webp',
-}
+export { PLACEHOLDERS } from '@/features/media/placeholders'
 
 export interface Thumbnails {
   thumb: Blob

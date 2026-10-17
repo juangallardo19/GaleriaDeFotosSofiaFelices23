@@ -148,6 +148,28 @@ describe('Google Drive (Adapter)', () => {
   })
 })
 
+describe('Vista previa de videos desde Drive', () => {
+  it('si Drive todavía está procesando el video, no hay miniatura', async () => {
+    const { drive } = driveWithFolders((c) => (c.url.startsWith('https://www.googleapis.com/drive/v3/files/vid1?') ? json({ hasThumbnail: false }) : undefined))
+    expect(await drive.videoThumbnail('vid1')).toBeNull()
+  })
+
+  it('baja la miniatura que genera Drive en tamaño grande, con el token, y la duración del video', async () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 1, 2, 3])
+    const { drive, calls } = driveWithFolders((c) => {
+      if (c.url.startsWith('https://www.googleapis.com/drive/v3/files/vid1?'))
+        return json({ thumbnailLink: 'https://lh3.googleusercontent.com/drive-storage/abc=s220', videoMediaMetadata: { durationMillis: '46500' } })
+      if (c.url.startsWith('https://lh3.googleusercontent.com/')) return new Response(png, { headers: { 'content-type': 'image/png' } })
+      return undefined
+    })
+    const thumb = await drive.videoThumbnail('vid1')
+    expect(thumb).toEqual({ image: png, contentType: 'image/png', durationSec: 47 })
+    const descarga = calls.find((c) => c.url.startsWith('https://lh3.googleusercontent.com/'))!
+    expect(descarga.url).toBe('https://lh3.googleusercontent.com/drive-storage/abc=s720')
+    expect(descarga.headers.authorization).toBe('Bearer acc')
+  })
+})
+
 describe('Correo con Gmail', () => {
   it('envía el mensaje en UTF-8 al correo del álbum', async () => {
     const f = fakeFetch((c) => (c.url.includes('oauth2') ? json({ access_token: 'acc', expires_in: 3600 }) : json({ id: 'msg' })))

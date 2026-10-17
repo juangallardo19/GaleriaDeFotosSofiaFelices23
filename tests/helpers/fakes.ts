@@ -16,6 +16,10 @@ export class FakeStorage implements StorageProvider {
   async makePublic(fileId: string) {
     this.publicIds.add(fileId)
   }
+  videoThumbnails = new Map<string, { image: Uint8Array; contentType: string; durationSec: number | null }>()
+  async videoThumbnail(fileId: string) {
+    return this.videoThumbnails.get(fileId) ?? null
+  }
   downloadUrl(fileId: string) {
     return `https://drive.fake/download/${fileId}`
   }

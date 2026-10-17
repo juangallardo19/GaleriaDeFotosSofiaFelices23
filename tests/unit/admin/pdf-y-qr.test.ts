@@ -21,7 +21,8 @@ describe('Imagen del QR', () => {
   })
 })
 
-describe('RF-14 · PDF de tarjetas para imprimir', () => {
+// Genera varios QR y el PDF: con todas las pruebas en paralelo pasa de los 5 s por defecto
+describe('RF-14 · PDF de tarjetas para imprimir', { timeout: 20_000 }, () => {
   it('una sola cara: 4 tarjetas por hoja A4', async () => {
     const pdf = await PDFDocument.load(await generateCardsPdf({ guests: guests(9), date: 'Viernes 16 de octubre de 2026' }))
     expect(pdf.getPageCount()).toBe(3)

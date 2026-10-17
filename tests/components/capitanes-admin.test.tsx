@@ -23,7 +23,8 @@ beforeEach(() => {
   }))
 })
 
-describe('Capitanes de mesa en el panel', () => {
+// Escribe con el teclado simulado: con todas las pruebas en paralelo pasa de los 5 s por defecto
+describe('Capitanes de mesa en el panel', { timeout: 15_000 }, () => {
   it('agrega una capitana y aparece en la lista, lista para imprimir', async () => {
     api.mockResolvedValue({ items: [] })
     render(<CaptainsScreen />)

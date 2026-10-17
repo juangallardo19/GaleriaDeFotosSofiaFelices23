@@ -109,6 +109,9 @@ class PgMediaRepository implements MediaRepository {
   async setHidden(id: string, hidden: boolean) {
     await this.db.update(media).set({ hidden }).where(eq(media.id, id))
   }
+  async updateVisuals(id: string, visuals: Pick<Media, 'thumbUrl' | 'width' | 'height' | 'durationSec'>) {
+    await this.db.update(media).set(visuals).where(eq(media.id, id))
+  }
   async increment(id: string, field: CounterField, by: number) {
     const col = COUNTER_COLUMN[field]
     const rows = await this.db

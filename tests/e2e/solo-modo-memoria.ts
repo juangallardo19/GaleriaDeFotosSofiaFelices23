@@ -7,7 +7,8 @@ const TOKEN = 'E2ETIAMARTA00000000000'
 export default async function soloModoMemoria(config: FullConfig) {
   const baseURL = config.projects[0].use.baseURL!
   const api = await request.newContext({ baseURL })
-  const res = await api.get(`/i/${TOKEN}`, { maxRedirects: 0 })
+  // La primera petición compila la ruta en el servidor de desarrollo: se le da más tiempo
+  const res = await api.get(`/i/${TOKEN}`, { maxRedirects: 0, timeout: 120_000 })
   const destino = res.headers().location ?? ''
   await api.dispose()
   if (!destino.includes('/bienvenida')) {

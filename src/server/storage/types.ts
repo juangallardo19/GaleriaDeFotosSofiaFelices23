@@ -9,6 +9,14 @@ export interface StorageProvider {
   remove(fileId: string): Promise<void>
   quota(): Promise<{ usedBytes: number; limitBytes: number }>
   folderLinks?(): Promise<FolderLinks>
+  // Miniatura que genera el proveedor para un video; null si todavía lo está procesando
+  videoThumbnail?(fileId: string): Promise<VideoThumbnail | null>
+}
+
+export interface VideoThumbnail {
+  image: Uint8Array
+  contentType: string
+  durationSec: number | null
 }
 
 export interface FolderLinks {

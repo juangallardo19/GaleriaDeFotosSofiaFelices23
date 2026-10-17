@@ -77,6 +77,10 @@ export class MemoryMediaRepository implements MediaRepository {
     const m = this.media.get(id)
     if (m) m.hidden = hidden
   }
+  async updateVisuals(id: string, visuals: Pick<Media, 'thumbUrl' | 'width' | 'height' | 'durationSec'>) {
+    const m = this.media.get(id)
+    if (m) Object.assign(m, visuals)
+  }
   async increment(id: string, field: CounterField, by: number) {
     const m = this.media.get(id)
     if (!m) return 0

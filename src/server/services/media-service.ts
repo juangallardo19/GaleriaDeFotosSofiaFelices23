@@ -1,7 +1,9 @@
 import { canDeleteComment, canEditComment, validateComment, type CommentInput } from '@/features/comments/comments'
 import type { SortKey } from '@/features/gallery/sort'
 import type { GalleryFilter } from '@/features/gallery/types'
+import { imageSize } from '@/features/media/image-size'
 import { classifyFile, type MediaKind } from '@/features/media/media-kind'
+import { PLACEHOLDERS } from '@/features/media/placeholders'
 import { buildQuotaEmail, crossedThreshold, shouldCheckQuota } from '@/features/storage/quota'
 import type { Author, Comment, CommentView, Media, MediaView, Viewer } from '../domain'
 import { AppError } from '../errors'
@@ -220,6 +222,35 @@ export function createMediaService(deps: MediaServiceDeps) {
       if (viewer.role !== 'admin') throw new AppError('prohibido')
       await mustFind(mediaId)
       await deps.media.setHidden(mediaId, hidden)
+    },
+
+    // Videos que quedaron con la imagen genérica porque el iPhone no pudo sacar el cuadro:
+    // se usa la miniatura que genera Drive (si Drive aún lo procesa, queda pendiente para otro intento)
+    async refreshVideoThumbs(viewer: Viewer): Promise<{ updated: number; pending: number }> {
+      if (viewer.role !== 'admin') throw new AppError('prohibido')
+      const waiting: Media[] = []
+      let cursor: string | null = null
+      do {
+        const page = await deps.media.page({
+          sort: 'recientes',
+          filter: { kind: 'video', includeHidden: true },
+          viewer: { id: viewer.id, likedIds: new Set() },
+          cursor,
+          limit: 60,
+        })
+        waiting.push(...page.items.filter((m) => m.thumbUrl === PLACEHOLDERS.video))
+        cursor = page.nextCursor
+      } while (cursor)
+      let updated = 0
+      for (const m of waiting) {
+        const thumb = deps.thumbs ? await deps.storage.videoThumbnail?.(m.driveFileId) : null
+        if (!thumb || !deps.thumbs) continue
+        const size = imageSize(thumb.image) ?? { width: 9, height: 16 }
+        const thumbUrl = await deps.thumbs.put({ data: thumb.image.slice().buffer, contentType: thumb.contentType, variant: 'thumb' })
+        await deps.media.updateVisuals(m.id, { thumbUrl, width: size.width, height: size.height, durationSec: thumb.durationSec ?? m.durationSec })
+        updated++
+      }
+      return { updated, pending: waiting.length - updated }
     },
 
     async setHiddenMany(viewer: Viewer, ids: string[], hidden: boolean) {
