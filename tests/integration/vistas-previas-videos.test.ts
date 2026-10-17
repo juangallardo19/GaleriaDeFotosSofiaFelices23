@@ -55,3 +55,22 @@ describe('Vistas previas de los videos que subieron sin miniatura (iPhone)', () 
     await expect(app.media.refreshVideoThumbs({ id: guest.id, role: 'guest' })).rejects.toThrow()
   })
 })
+
+describe('Al abrir el álbum, los videos sin vista previa se arreglan solos', () => {
+  it('la lista del álbum dispara la búsqueda de la miniatura en Drive y la próxima vez ya sale', async () => {
+    const { GET: listar } = await import('@/app/api/media/route')
+    const { NextRequest } = await import('next/server')
+    const { videoThumbHealer } = await import('@/server/video-thumb-healer')
+    videoThumbHealer.reset()
+    const iphone = await video(PLACEHOLDERS.video, 'drive-iphone')
+    app.storage.videoThumbnails.set('drive-iphone', { image: pngHeader(405, 720), contentType: 'image/jpeg', durationSec: 6 })
+
+    const res = await listar(new NextRequest('https://sofi23.vercel.app/api/media?sort=recientes'))
+    expect(res.status).toBe(200)
+    await videoThumbHealer.idle()
+
+    const nuevo = await app.media.get(admin, iphone.id)
+    expect(nuevo.thumbUrl).not.toBe(PLACEHOLDERS.video)
+    expect(nuevo).toMatchObject({ width: 405, height: 720, durationSec: 6 })
+  })
+})

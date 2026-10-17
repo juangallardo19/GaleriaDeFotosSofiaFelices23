@@ -5,6 +5,7 @@ import type { MediaKind } from '@/features/media/media-kind'
 import { AppError } from '@/server/errors'
 import { parseBody, requireViewer, route, viewerOrVisitor } from '@/server/http'
 import { toPublicMedia } from '@/server/serialize'
+import { healVideoThumbsLater, needsVideoThumbs } from '@/server/video-thumb-healer'
 import { RegisterBody } from '@/server/validation'
 
 export const GET = route(async (req, app) => {
@@ -23,6 +24,8 @@ export const GET = route(async (req, app) => {
   }
   const limit = q.has('limit') ? Number(q.get('limit')) : undefined
   const page = await app.media.list(viewer, { sort, filter, cursor: q.get('cursor'), limit })
+  // Si hay videos del iPhone sin vista previa, se buscan sus miniaturas en Drive después de responder
+  if (needsVideoThumbs(page.items)) healVideoThumbsLater(app)
   return NextResponse.json({ items: page.items.map((m) => toPublicMedia(m, app.media.streamUrl)), nextCursor: page.nextCursor })
 })
 
